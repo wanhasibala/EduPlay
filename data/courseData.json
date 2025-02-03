@@ -1,0 +1,161 @@
+{
+  "users": [
+    {
+      "user_id": 1,
+      "name": "John Doe",
+      "email": "john@example.com",
+      "password": "******",
+      "role": "Student",
+      "profile_image": "https://plus.unsplash.com/premium_photo-1664870883044-0d82e3d63d99?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+    },
+    {
+      "user_id": 2,
+      "name": "Jane Smith",
+      "email": "jane@example.com",
+      "password": "******",
+      "role": "Student",
+      "profile_image": "jane.jpg"
+    },
+    {
+      "user_id": 3,
+      "name": "Alice Brown",
+      "email": "alice@course.com",
+      "password": "******",
+      "role": "Instructor",
+      "profile_image": "https://plus.unsplash.com/premium_photo-1664870883044-0d82e3d63d99?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+    }
+  ],
+  "category": [
+    { "category_id": 1, "name": "Design" },
+    { "category_id": 2, "name": "Coding" },
+    { "category_id": 3, "name": "Business" },
+    { "category_id": 4, "name": "3D Modeling" }
+  ],
+  "courses": [
+    {
+      "course_id": 101,
+      "course_title": "Learn Python",
+      "category_id": 2,
+      "course_description": "Python programming basics",
+      "course_image": "https://plus.unsplash.com/premium_photo-1664870883044-0d82e3d63d99?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+      "price": 100,
+      "created_date": "2024-01-10",
+      "course_duration": "6 weeks",
+      "instructor_id": 3
+    },
+    {
+      "course_id": 102,
+      "course_title": "Web Development",
+      "course_description": "Intro to HTML, CSS, JS",
+      "course_image": "webdev.jpg",
+      "price": 150,
+      "created_date": "2024-02-15",
+      "course_duration": "7 weeks",
+      "instructor_id": 3
+    }
+  ],
+  "videos": [
+    {
+      "video_id": 201,
+      "course_id": 101,
+      "video_title": "Python Basics",
+      "video_thumbnail": "https://images.unsplash.com/photo-1501504905252-473c47e087f8?q=80&w=2748&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+      "video_url": "video1.com/python1",
+      "video_description": "Learn variables and types",
+      "upload_date": "2024-01-11",
+      "duration": "01:30"
+    },
+    {
+      "video_id": 202,
+      "course_id": 101,
+      "video_title": "Python Loops and Functions",
+      "video_url": "video1.com/python2",
+      "video_description": "Learn loops and functions",
+      "upload_date": "2024-01-13",
+      "duration": "01:30",
+      "video_thumbnail": "https://images.unsplash.com/photo-1501504905252-473c47e087f8?q=80&w=2748&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+    },
+    {
+      "video_id": 203,
+      "course_id": 102,
+      "video_title": "HTML Introduction",
+      "video_url": "video2.com/html1",
+      "video_description": "Learn the basics of HTML",
+      "upload_date": "2024-02-16",
+      "duration": "1 jam 40 menit"
+    },
+    {
+      "video_id": 204,
+      "course_id": 102,
+      "video_title": "CSS Basics",
+      "video_url": "video2.com/css1",
+      "video_description": "Learn styling with CSS",
+      "upload_date": "2024-02-18",
+      "duration": "1 jam 20 menit"
+    }
+  ],
+  "progress": [
+    {
+      "progress_id": 301,
+      "user_id": 1,
+      "video_id": 201,
+      "progress_percentage": "100%",
+      "last_watched_time": "00:10:00",
+      "completed": "Yes"
+    },
+    {
+      "progress_id": 302,
+      "user_id": 1,
+      "video_id": 202,
+      "progress_percentage": "50%",
+      "last_watched_time": "00:05:00",
+      "completed": "No"
+    },
+    {
+      "progress_id": 303,
+      "user_id": 2,
+      "video_id": 203,
+      "progress_percentage": "25%",
+      "last_watched_time": "00:03:00",
+      "completed": "No"
+    }
+  ],
+  "payment": [
+    {
+      "payment_id": 401,
+      "user_id": 1,
+      "course_id": 101,
+      "payment_method": "Full Payment",
+      "amount_paid": 100,
+      "payment_status": "Completed",
+      "payment_date": "2024-01-12"
+    },
+    {
+      "payment_id": 402,
+      "user_id": 2,
+      "course_id": 102,
+      "payment_method": "Installment",
+      "amount_paid": 50,
+      "payment_status": "Pending",
+      "payment_date": "2024-02-17"
+    }
+  ],
+  "installment": [
+    {
+      "installment_id": 501,
+      "payment_id": 402,
+      "installment_number": 1,
+      "installment_amount": 50,
+      "due_date": "2024-02-17",
+      "payment_status": "Completed"
+    },
+    {
+      "installment_id": 502,
+      "payment_id": 402,
+      "installment_number": 2,
+      "installment_amount": 50,
+      "due_date": "2024-03-17",
+      "payment_status": "Pending"
+    }
+  ]
+}

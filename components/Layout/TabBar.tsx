@@ -2,83 +2,54 @@ import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import React from "react";
 import { Ionicons } from "@expo/vector-icons";
 import { COLORS } from "../constant/color";
+import { Link } from "expo-router";
 
-interface TabBar {
+interface TabBarProps {
   state: any;
   descriptors: any;
-  navigation: any;
 }
 interface IconProps {
-  [key: string]: (props: { color?: string; size?: number }) => JSX.Element;
+  [key: string]: (props: { color: string; size: number }) => JSX.Element;
 }
-const TabBar = ({ state, descriptors, navigation }: TabBar) => {
-  const icons: IconProps = {
-    index: (props) => (
-      <View {...props} style={styles.icon}>
-        <Ionicons name="home" size={26} color="#737373" {...props} />
-      </View>
-    ),
-    course: (props) => (
-      <View {...props} style={styles.icon}>
-        <Ionicons name="play" size={26} color="#737373" {...props} />
-      </View>
-    ),
-    notification: (props) => (
-      <View {...props} style={styles.icon}>
-        <Ionicons name="notifications" size={26} color="#737373" {...props} />
-      </View>
-    ),
-    profile: (props) => (
-      <View {...props} style={styles.icon}>
-        <Ionicons name="person" size={26} color="#737373" {...props} />
-      </View>
-    ),
-  };
 
+const TabBar = ({ state, descriptors }: TabBarProps) => {
+  const icons: IconProps = {
+    index: (props) => <Ionicons name="home" {...props} />,
+    course: (props) => <Ionicons name="play" {...props} />,
+    notification: (props) => <Ionicons name="notifications" {...props} />,
+    profile: (props) => <Ionicons name="person" {...props} />,
+  };
   return (
     <View style={styles.tabbar}>
-      {state.routes.map((route: any, index: any) => {
+      {state.routes.map((route: any, index: number) => {
         const { options } = descriptors[route.key];
 
-        if (["_sitemap", "+not-found"].includes(route.name)) return null;
+        if (
+          ["_sitemap", "+not-found", "courseDetail/[id]"].includes(route.name)
+        )
+          return null;
 
+        const href = route.name === "index" ? "/" : `${route.name}`;
         const isFocused = state.index === index;
 
-        const onPress = () => {
-          const event = navigation.emit({
-            type: "tabPress",
-            target: route.key,
-            canPreventDefault: true,
-          });
-
-          if (!isFocused && !event.defaultPrevented) {
-            navigation.navigate(route.name, route.params);
-          }
-        };
-
-        const onLongPress = () => {
-          navigation.emit({
-            type: "tabLongPress",
-            target: route.key,
-          });
-        };
-
         return (
-          <TouchableOpacity
-            key={route.name}
-            style={styles.tabbarItem}
-            accessibilityRole="button"
-            accessibilityState={isFocused ? { selected: true } : {}}
-            accessibilityLabel={options.tabBarAccessibilityLabel}
-            testID={options.tabBarTestID}
-            onPress={onPress}
-            onLongPress={onLongPress}
-          >
-            {icons[route.name]({
-              color: isFocused ? "#ededed" : COLORS.gray2,
-              backgroundColor: isFocused ? COLORS.tertiary : "#fff",
-            })}
-          </TouchableOpacity>
+          <Link key={route.name} href={href} asChild style={styles.tabbarItem}>
+            <TouchableOpacity
+              accessibilityRole="button"
+              accessibilityState={isFocused ? { selected: true } : {}}
+              accessibilityLabel={options.tabBarAccessibilityLabel}
+              testID={options.tabBarTestID}
+            >
+              {icons[route.name] ? (
+                icons[route.name]({
+                  color: isFocused ? COLORS.tertiary : COLORS.gray2,
+                  size: 26,
+                })
+              ) : (
+                <Text style={{ color: COLORS.gray2 }}>?</Text>
+              )}
+            </TouchableOpacity>
+          </Link>
         );
       })}
     </View>
@@ -96,7 +67,6 @@ const styles = StyleSheet.create({
     marginHorizontal: 20,
     paddingVertical: 15,
     borderRadius: 99,
-    borderCurve: "continuous",
     shadowColor: "black",
     shadowOffset: { width: 0, height: 10 },
     shadowRadius: 10,
@@ -106,12 +76,6 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    gap: 4,
-  },
-  icon: {
-    paddingHorizontal: 10,
-    paddingVertical: 10,
-    borderRadius: 99,
   },
 });
 

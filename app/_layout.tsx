@@ -1,33 +1,11 @@
-import { Stack, Tabs } from "expo-router";
-import TabBar from "../components/Layout/TabBar";
+import { View, Text } from "react-native";
+import React from "react";
+import { Tabs, Stack } from "expo-router";
 
-export default function RootLayout() {
-  return (
-    <Tabs tabBar={(props) => <TabBar {...props} />}>
-      <Tabs.Screen
-        name="index"
-        options={{
-          title: "Home",
-        }}
-      />
-      <Tabs.Screen
-        name="course"
-        options={{
-          title: "Course",
-        }}
-      />
-      <Tabs.Screen
-        name="notification"
-        options={{
-          title: "Notification",
-        }}
-      />
-      <Tabs.Screen
-        name="profile"
-        options={{
-          title: "Profile",
-        }}
-      />
-    </Tabs>
-  );
-}
+import "../global.css";
+
+const RootLayout = () => {
+  return <Stack screenOptions={{ headerShown: false }} />;
+};
+
+export default RootLayout;
