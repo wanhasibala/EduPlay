@@ -5,9 +5,11 @@ import {
   TouchableOpacity,
   Image,
   FlatList,
+  Dimensions,
 } from "react-native";
+import WebView from 'react-native-webview';
 import { Ionicons } from "@expo/vector-icons";
-import React, { useMemo } from "react";
+import React, { useMemo, useRef, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Stack, useLocalSearchParams, Link } from "expo-router";
 import { courses, users, lessons } from "@/data/data.json";
@@ -20,6 +22,12 @@ interface LessonItemProps {
   item: Lesson;
   isCurrentLesson?: boolean;
 }
+
+const getYouTubeVideoId = (url: string) => {
+  const regex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
+  const match = url?.match(regex);
+  return match ? match[1] : null;
+};
 
 const Playlist = () => {
   const params = useLocalSearchParams();
@@ -106,12 +114,27 @@ const Playlist = () => {
       <ScrollView className="bg-white">
         {/* VideoPlayer */}
         <View className="aspect-video relative">
-          <Image source={{ uri: thumbnailUrl }} className="aspect-video" />
-          <View className="absolute inset-0 items-center justify-center">
-            <TouchableOpacity className="bg-black/50 rounded-full p-4">
-              <Ionicons name="play" size={32} color="white" />
-            </TouchableOpacity>
-          </View>
+          {lesson?.video_url ? (
+            <WebView
+              source={{
+                uri: `https://www.youtube.com/embed/${getYouTubeVideoId(lesson?.video_url)}?playsinline=1&autoplay=0`,
+              }}
+              className="aspect-video"
+              allowsFullscreenVideo
+              javaScriptEnabled
+              domStorageEnabled
+              startInLoadingState
+              renderLoading={() => (
+                <View className="absolute inset-0 items-center justify-center bg-black/20">
+                  <Text className="text-white font-poppins-medium">Loading...</Text>
+                </View>
+              )}
+            />
+          ) : (
+            <View className="aspect-video items-center justify-center bg-gray-200">
+              <Text className="text-gray-600 font-poppins-medium">No video available</Text>
+            </View>
+          )}
         </View>
 
         {/* Description */}
