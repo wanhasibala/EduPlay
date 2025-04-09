@@ -53,7 +53,6 @@ export const ListCourse = () => {
         data={course}
         renderItem={({ item }) => (
           <View>
-            <Text>{item.progress}</Text>
             <ItemPopular
               title={item.course_title}
               mentor={getInstructorName(item.instructor_id).name}
@@ -96,6 +95,7 @@ const ItemPopular = ({
           <Text
             numberOfLines={1}
             style={{ fontSize: 20, fontWeight: 500, width: 250 }}
+            className="font-poppins"
           >
             {title}
           </Text>
@@ -117,7 +117,7 @@ const ItemPopular = ({
           </View>
           <Text style={{ fontSize: 14 }}>{duration} </Text>
         </View>
-        <Ionicons name="chevron-forward" size={20} />
+        <Ionicons name="chevron-forward" className="absolute right-5" size={20} />
       </View>
     </Link>
   );

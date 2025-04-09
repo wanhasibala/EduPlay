@@ -9,37 +9,34 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useRouter } from "expo-router";
+import { Link, useRouter } from "expo-router";
 
 interface CustomHeaderProps {
   title: string;
-  showBackButton?: boolean;
+  description?: string;
+  href?: string;
 }
 
-const Header: React.FC<CustomHeaderProps> = ({ title, showBackButton }) => {
+const Header: React.FC<CustomHeaderProps> = ({ title, description, href }) => {
   const router = useRouter();
   return (
     <SafeAreaView className="-mb-5">
       <View style={styles.headerContainer}>
-        {showBackButton && (
-          <Pressable onPress={() => router.back()} className="absolute left-10">
+        {href && (
+          <Link href={href || ".."} className="absolute left-10">
             <Ionicons name="chevron-back" size={20} />
-          </Pressable>
+          </Link>
         )}
         <View className="flex items-center gap-2">
-          <Text style={styles.text}>{title}</Text>
-          {showBackButton && (
-            <Text className="text-blue-400 text-sm">1 Course</Text>
+          <Text className="font-poppins-semibold" style={styles.text}>
+            {title}
+          </Text>
+          {description && (
+            <Text className="text-blue-400 text-sm font-poppins">
+              {description}
+            </Text>
           )}
         </View>
-        {showBackButton && (
-          <Pressable
-            onPress={() => router.back()}
-            className="absolute right-10"
-          >
-            <Ionicons name="search" size={20} />
-          </Pressable>
-        )}
       </View>
     </SafeAreaView>
   );

@@ -3,7 +3,7 @@ import React from "react";
 import HorizontalList from "@/components/Notifications/ListHorizontal";
 import VerticalList from "@/components/Notifications/VerticalList";
 
-const notification = () => {
+const wishlist = () => {
   return (
     <View className="flex gap-10">
       <HorizontalList />
@@ -12,4 +12,4 @@ const notification = () => {
   );
 };
 
-export default notification;
+export default wishlist;

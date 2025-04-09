@@ -1,35 +1,60 @@
-import React from "react";
+import React, { useState } from "react";
 import { Button, View, Alert } from "react-native";
-import storage from "@react-native-firebase/storage";
-import * as FileSystem from "expo-file-system"; // Use expo-file-system for local file handling
+import * as FileSystem from "expo-file-system";
+import { initializeApp } from "firebase/app";
+import { getStorage, ref, uploadString } from "firebase/storage";
+
+// Initialize Firebase
+const firebaseConfig = {
+  // Your Firebase config here
+  apiKey: "your-api-key",
+  authDomain: "your-domain.firebaseapp.com",
+  projectId: "your-project",
+  storageBucket: "your-bucket.appspot.com",
+  messagingSenderId: "your-sender-id",
+  appId: "your-app-id"
+};
+
+const app = initializeApp(firebaseConfig);
+const storage = getStorage(app);
 
 const UploadToFirebase = () => {
+  const [uploading, setUploading] = useState(false);
+
   const uploadDataToFirebase = async () => {
     try {
-      // Path to the local JSON file (adjust path based on your structure)
-      const fileUri = FileSystem.documentDirectory + "courseData2.json";
+      setUploading(true);
 
-      // Create a blob or file reference to upload
-      const response = await FileSystem.downloadAsync(
-        require("./assets/courseData2.json"),
-        fileUri,
-      );
+      // Read the data.json file
+      const jsonContent = require("../../data/data.json");
+      
+      // Convert JSON to string
+      const jsonString = JSON.stringify(jsonContent, null, 2);
 
-      const storageRef = storage().ref("../../data/courseData.json");
+      // Create a reference to 'data.json' in Firebase Storage
+      const storageRef = ref(storage, 'data/data.json');
 
-      // Upload file to Firebase Storage
-      await storageRef.putFile(response.uri);
+      // Upload the string data directly
+      await uploadString(storageRef, jsonString, 'raw', {
+        contentType: 'application/json'
+      });
 
       Alert.alert("Success", "Data uploaded to Firebase Storage successfully!");
     } catch (error) {
       console.error("Error uploading data:", error);
       Alert.alert("Error", "Failed to upload data. Check console for details.");
+    } finally {
+      setUploading(false);
     }
   };
 
   return (
-    <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-      <Button title="Upload Data" onPress={uploadDataToFirebase} />
+    <View style={{ flex: 1, justifyContent: "center", alignItems: "center", height: 200 }} className="border h-[100px]">
+      <Button 
+        title={uploading ? "Uploading..." : "Upload Data"} 
+        onPress={uploadDataToFirebase}
+        disabled={uploading}
+      />
     </View>
   );
 };

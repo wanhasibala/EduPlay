@@ -5,10 +5,10 @@ import Header from "@/components/Layout/Header";
 export default function RootLayout() {
   const pathname = usePathname(); // Get the current route pathname
 
-  const hideTabBarRoutes = ["/courseDetail/"];
+  const hideTabBarRoutes = ["/courseDetail", "/courseDetail/playlist", "/enroll"];
 
   const shouldHideTabBar = hideTabBarRoutes.some((route) =>
-    pathname.startsWith(route),
+    pathname.startsWith(route)
   );
   return (
     <Tabs
@@ -22,17 +22,24 @@ export default function RootLayout() {
         }}
       />
       <Tabs.Screen
-        name="course"
+        name="search"
         options={{
-          title: "Course",
-          header: () => <Header title="Course" showBackButton={true} />,
+          title: "Search",
+          headerShown: false,
         }}
       />
       <Tabs.Screen
-        name="notification"
+        name="course"
         options={{
-          title: "Notification",
-          header: () => <Header title="Notification" />,
+          title: "Course",
+          header: () => <Header title="Course"  />,
+        }}
+      />
+      <Tabs.Screen
+        name="wishlist"
+        options={{
+          title: "Wishlist",
+          header: () => <Header title="Wishlist" />,
         }}
       />
       <Tabs.Screen

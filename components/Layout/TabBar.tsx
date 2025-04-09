@@ -14,10 +14,33 @@ interface IconProps {
 
 const TabBar = ({ state, descriptors }: TabBarProps) => {
   const icons: IconProps = {
-    index: (props) => <Ionicons name="home" {...props} />,
-    course: (props) => <Ionicons name="play" {...props} />,
-    notification: (props) => <Ionicons name="notifications" {...props} />,
-    profile: (props) => <Ionicons name="person" {...props} />,
+    index: (props) => (
+      <Ionicons name={state.index === 0 ? "home" : "home-outline"} {...props} />
+    ),
+    search: (props) => (
+      <Ionicons
+        name={state.index === 1 ? "search" : "search-outline"}
+        {...props}
+      />
+    ),
+    course: (props) => (
+      <Ionicons
+        name={state.index === 2 ? "play-circle" : "play-circle-outline"}
+        {...props}
+      />
+    ),
+    wishlist: (props) => (
+      <Ionicons
+        name={state.index === 3 ? "heart" : "heart-outline"}
+        {...props}
+      />
+    ),
+    profile: (props) => (
+      <Ionicons
+        name={state.index === 4 ? "person-circle" : "person-circle-outline"}
+        {...props}
+      />
+    ),
   };
   return (
     <View style={styles.tabbar}>
@@ -25,11 +48,18 @@ const TabBar = ({ state, descriptors }: TabBarProps) => {
         const { options } = descriptors[route.key];
 
         if (
-          ["_sitemap", "+not-found", "courseDetail/[id]"].includes(route.name)
+          [
+            "_sitemap",
+            "+not-found",
+            "courseDetail/[id]",
+            "courseDetail/playlist/[id]",
+            "enroll/[id]",
+            "category/[id]",
+          ].includes(route.name)
         )
           return null;
 
-        const href = route.name === "index" ? "/" : `${route.name}`;
+        const href = route.name === "index" ? "/" : `/(tab)/${route.name}`;
         const isFocused = state.index === index;
 
         return (

@@ -2,6 +2,7 @@ import { View, Text } from "react-native";
 import React from "react";
 import CardProfile from "@/components/Profile/Card";
 import ProfileSettings from "@/components/Profile/Settings";
+import UploadToFirebase from "@/components/Home/UploadToFirebase";
 
 const profile = () => {
   return (

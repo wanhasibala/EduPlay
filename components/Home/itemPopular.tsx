@@ -7,40 +7,26 @@ import {
   StyleSheet,
 } from "react-native";
 import { useState, useEffect } from "react";
-import courseData2 from "@/data/courseData";
+import data from "@/data/data.json";
 import { COLORS } from "@/components/constant/color";
 import { Link } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-
-type Course = {
-  course_id: number;
-  course_title: string;
-  course_image: string;
-  course_duration: string;
-  instructor_id: number;
-};
-
-type User = {
-  user_id: number;
-  name: string;
-  profile_image: string | null;
-};
+import { Course, User } from "@/types/index";
 
 export const ListCourse = () => {
   const [course, setCourses] = useState<Course[]>([]);
   const [users, setUsers] = useState<User[]>([]);
 
   useEffect(() => {
-    //@ts-ignore
-    setCourses(courseData2.courses);
-    setUsers(courseData2.users);
+    setCourses(data.courses);
+    setUsers(data.users);
   }, []); // Add dependency array to prevent infinite re-render
 
   const getInstructorName = (instructorId: number): User => {
-    const instructor = users.find((user) => user.user_id === instructorId);
+    const instructor = users.find((user) => user.id_user === instructorId);
     return (
       instructor || {
-        user_id: 0,
+        id_user: 0,
         name: "Unknown Instructor",
         profile_image: null,
       }
@@ -57,21 +43,21 @@ export const ListCourse = () => {
         }}
       >
         <Text style={styles.title}> Popular</Text>
-        <Text> Lihat semua</Text>
+        <Text className="font-poppins"> Lihat semua</Text>
       </View>
       <FlatList
         data={course}
         renderItem={({ item }) => (
           <ItemPopular
-            title={item.course_title}
+            title={item.title}
             mentor={getInstructorName(item.instructor_id).name}
-            duration={item.course_duration}
+            duration={item.duration}
             image={item.course_image}
             mentorImage={getInstructorName(item.instructor_id).profile_image}
-            id={item.course_id}
+            id={item.id_course}
           />
         )}
-        keyExtractor={(item) => item.course_id.toString()} // Ensure unique key as string
+        keyExtractor={(item) => item.id_course.toString()} // Ensure unique key as string
       />
     </View>
   );
@@ -89,20 +75,21 @@ const ItemPopular = ({
   image: string;
   mentor: string;
   duration: string;
-  mentorImage: string | null;
+  mentorImage?: string;
   id: number;
 }) => {
   return (
     <Link href={`/courseDetail/${id}`} className="mb-2">
-      <View className="flex flex-row border-2 items-center border-gray-300 p-2 rounded-xl mb-2 w-full bg-white gap-4">
+      <View className="flex flex-row  items-center p-2 rounded-xl mb-2 w-full bg-white gap-4 relative">
         <Image
           source={{ uri: `${image}` }}
           className="h-full w-auto aspect-square rounded-md"
         />
-        <View style={{ gap: 10 }} className="">
+        <View style={{ gap: 10 }} className="w-fit ">
           <Text
             numberOfLines={1}
-            style={{ fontSize: 20, fontWeight: 500, width: 250 }}
+            style={{ fontSize: 20, fontWeight: 500, maxWidth: 250 }}
+            className="font-poppins-medium "
           >
             {title}
           </Text>
@@ -120,11 +107,19 @@ const ItemPopular = ({
                 ]}
               />
             )}
-            <Text style={{ fontSize: 14 }}>{mentor}</Text>
+            <Text style={{ fontSize: 14 }} className="font-poppins">
+              {mentor}
+            </Text>
           </View>
-          <Text style={{ fontSize: 14 }}>{duration} </Text>
+          <Text style={{ fontSize: 14 }} className="font-poppins">
+            {duration}{" "}
+          </Text>
         </View>
-        <Ionicons name="chevron-forward" size={20} />
+        <Ionicons
+          name="chevron-forward"
+          size={20}
+          className="absolute right-5"
+        />
       </View>
     </Link>
   );
@@ -149,6 +144,6 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 18,
-    fontWeight: "600",
+    fontFamily: "Poppins_600SemiBold",
   },
 });

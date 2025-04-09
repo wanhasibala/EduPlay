@@ -1,100 +1,133 @@
-import { View, Text, SafeAreaView, Image } from "react-native";
+import {
+  View,
+  Text,
+  SafeAreaView,
+  Image,
+  FlatList,
+  Pressable,
+  ScrollView,
+} from "react-native";
 import React from "react";
-import { Stack, useLocalSearchParams } from "expo-router";
-import courseData2 from "@/data/courseData";
+import { Link, Stack, useLocalSearchParams, useNavigation } from "expo-router";
+import data from "@/data/data.json";
 import { Ionicons } from "@expo/vector-icons";
 import Header from "@/components/Layout/Header";
 import { Slider } from "@/components/CourseDetail/Slider";
+import ContentPreview from "@/components/CourseDetail/ContentPreview";
+import { navigate } from "expo-router/build/global-state/routing";
 
 const CourseDetail = () => {
+  const navigate = useNavigation();
   const params = useLocalSearchParams();
   // const id = params.id ? Number(params.id) : null;
 
-  const course = courseData2.courses.find(
-    (item) => item.course_id === Number(params.id),
+  const course = data.courses.find(
+    (item) => item.id_course === Number(params.id)
   );
-  const video = courseData2.videos.filter(
-    (item) => item.course_id === course?.course_id,
+  const video = data.lessons.filter(
+    (item) => item.course_id === course?.id_course
   );
-
+  const slider = data.lessons.filter(
+    (item) =>
+      item.course_id === course?.id_course &&
+      item.type === "Video" &&
+      item.paid === false
+  );
+  const instructor = data.users.find(
+    (item) => course?.instructor_id === item.id_user
+  );
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <Stack.Screen
         options={{
           //@ts-ignore
           header: () => (
-            <Header title={course?.course_title} showBackButton={true} />
+            <Header title={"Course Detail"}  />
           ),
         }}
       />
-      <View className="px-5">
-        <View>
+      <ScrollView className="px-5 ">
+        <View className="mb-32">
           <View>
             {/* @ts-ignore  */}
-            <Slider data={video} />
+            <Slider data={slider} />
           </View>
 
           <View>
             <View>
-              <Text style={{ fontSize: 24, fontWeight: "600" }}>
-                {course?.course_title}
+              <Text
+                style={{ fontSize: 24, fontWeight: "600", marginVertical: 20 }}
+                className="font-poppins-semibold"
+              >
+                {course?.title}
               </Text>
-              <View>
-                <View>
+              <View className="flex flex-row justify-between ">
+                <View className="flex flex-row place-items-center gap-2 mt-2">
                   <Image
-                    // source={{ uri: instructor.profile_image }}
-                    width={16}
-                    height={16}
+                    source={{ uri: instructor?.profile_image }}
+                    width={20}
+                    height={20}
+                    className="rounded-full"
                   />
+                  <Text style={{ fontSize: 16 }} className="font-poppins">
+                    {instructor?.name}
+                  </Text>
                 </View>
-                {/* <Text style={{ fontSize: 16 }}>{instructor.name}</Text> */}
+                <View className="flex flex-row p-2 gap-2 bg-[#FFF0CC] rounded-md">
+                  <Ionicons name="star" color="#FFB200" size={16} />
+                  <Text
+                    style={{ fontSize: 18, fontWeight: "600" }}
+                    className="font-poppins-medium"
+                  >
+                    {course?.rating}
+                  </Text>
+                </View>
               </View>
-            </View>
-            <View
-              style={{
-                flexDirection: "row",
-                alignSelf: "flex-end",
-                backgroundColor: "#ffefcc",
-                gap: 2,
-                justifyContent: "center",
-                alignItems: "center",
-              }}
-            >
-              <Ionicons name="star" color="#FFB200" size={20} />
-              <Text style={{ fontSize: 18, fontWeight: "600" }}>4.6</Text>
             </View>
           </View>
           <View>
             <View style={{ gap: 10 }}>
-              <Text style={{ fontSize: 18, fontWeight: "500" }}>
+              <Text
+                style={{ fontSize: 18, fontWeight: "500" }}
+                className="font-poppins-medium"
+              >
                 Description
               </Text>
-              <Text style={{ fontSize: 14 }}>{course?.course_description}</Text>
+              <Text style={{ fontSize: 14 }} className="font-poppins">
+                {course?.description}
+              </Text>
             </View>
             <View>
-              {/* <FlatList */}
-              {/*   data={video} */}
-              {/*   renderItem={({ item }) => ( */}
-              {/*     <ContentPreview */}
-              {/*       title={item.video_title} */}
-              {/*       duration={item.duration} */}
-              {/*       video={video} */}
-              {/*     /> */}
-              {/*   )} */}
-              {/*   keyExtractor={(item) => item.id} */}
-              {/*   contentContainerStyle={{ gap: 10 }} */}
-              {/* /> */}
+              <Text className="text-xl font-medium my-5 font-poppins-medium">
+                Preview
+              </Text>
+              <FlatList
+                data={video}
+                renderItem={({ item }) => (
+                  <ContentPreview
+                    id={item.id_lesson.toString()}
+                    title={item.title}
+                    order={item.order}
+                    type={item.type}
+                    duration={item.duration}
+                    paid={item.paid}
+                  />
+                )}
+                keyExtractor={(item) => item?.id_lesson.toString()}
+                contentContainerStyle={{ gap: 10 }}
+              />
             </View>
           </View>
         </View>
-      </View>
-      <View
+      </ScrollView>
+      <Link
         style={{
           position: "absolute",
           bottom: 50,
           width: "100%",
           paddingHorizontal: 20,
         }}
+        href={`/enroll/${course?.id_course}`}
       >
         <View
           style={{
@@ -108,7 +141,7 @@ const CourseDetail = () => {
         >
           <Text style={{ color: "#fff", fontSize: 20 }}>Enroll Now</Text>
         </View>
-      </View>
+      </Link>
     </SafeAreaView>
   );
 };
