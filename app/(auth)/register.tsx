@@ -5,6 +5,7 @@ import {
   TextInput,
   TouchableOpacity,
 } from "react-native";
+import Toast from 'react-native-toast-message';
 import { useState } from "react";
 import { Link, useRouter } from "expo-router";
 import { useAuth } from "../../components/auth/AuthProvider";
@@ -20,17 +21,56 @@ export default function RegisterScreen() {
   const handleRegister = async () => {
     if (loading) return;
 
+    if (!email || !password || !confirmPassword) {
+      const message = "Please fill in all fields";
+      setError(message);
+      Toast.show({
+        type: 'error',
+        text1: 'Error',
+        text2: message
+      });
+      return;
+    }
+
+    if (password.length < 6) {
+      const message = "Password must be at least 6 characters";
+      setError(message);
+      Toast.show({
+        type: 'error',
+        text1: 'Error',
+        text2: message
+      });
+      return;
+    }
+
     if (password !== confirmPassword) {
-      setError("Passwords do not match");
+      const message = "Passwords do not match";
+      setError(message);
+      Toast.show({
+        type: 'error',
+        text1: 'Error',
+        text2: message
+      });
       return;
     }
 
     setError("");
     try {
       await signUp(email, password);
-      // On successful registration, useAuth hook will handle navigation
+      Toast.show({
+        type: 'success',
+        text1: 'Success',
+        text2: 'Registration successful! Check your email to confirm your account.',
+        visibilityTime: 4000
+      });
     } catch (err: any) {
-      setError(err.message || "An error occurred during registration");
+      const errorMessage = err.message || "An error occurred during registration";
+      setError(errorMessage);
+      Toast.show({
+        type: 'error',
+        text1: 'Error',
+        text2: errorMessage
+      });
     }
   };
 
@@ -54,7 +94,8 @@ export default function RegisterScreen() {
         placeholder="Password"
         value={password}
         onChangeText={setPassword}
-        
+        secureTextEntry
+        autoCapitalize="none"
       />
 
       <TextInput
@@ -62,7 +103,8 @@ export default function RegisterScreen() {
         placeholder="Confirm Password"
         value={confirmPassword}
         onChangeText={setConfirmPassword}
-        
+        secureTextEntry
+        autoCapitalize="none"
       />
 
       <TouchableOpacity

@@ -1,7 +1,7 @@
-import { StatusBar } from "react-native";
+import { StatusBar, View } from "react-native";
 import React, { useEffect } from "react";
-import { Stack } from "expo-router";
-import * as SplashScreen from "expo-splash-screen";
+import { Stack, SplashScreen } from "expo-router";
+import Toast from 'react-native-toast-message';
 import {
   useFonts,
   Poppins_400Regular,
@@ -16,7 +16,7 @@ import "../global.css";
 // Keep the splash screen visible while we fetch resources
 SplashScreen.preventAutoHideAsync();
 
-const RootLayout = () => {
+export default function RootLayout() {
   const [fontsLoaded] = useFonts({
     Poppins_400Regular,
     Poppins_500Medium,
@@ -37,9 +37,37 @@ const RootLayout = () => {
   return (
     <AuthProvider>
       <StatusBar barStyle="dark-content" />
-      <Stack screenOptions={{ headerShown: false }} />
+      <Stack>
+        <Stack.Screen
+          name="index"
+          options={{
+            headerShown: false,
+            animation: 'none'
+          }}
+        />
+        <Stack.Screen
+          name="(onboarding)"
+          options={{
+            headerShown: false,
+            animation: 'slide_from_right'
+          }}
+        />
+        <Stack.Screen
+          name="(auth)"
+          options={{
+            headerShown: false,
+            animation: 'slide_from_right'
+          }}
+        />
+        <Stack.Screen
+          name="(tab)"
+          options={{
+            headerShown: false,
+            animation: 'fade'
+          }}
+        />
+      </Stack>
+      <Toast />
     </AuthProvider>
   );
-};
-
-export default RootLayout;
+}

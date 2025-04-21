@@ -1,10 +1,19 @@
-import { View, Text, Button } from "react-native";
+import { View, Text, TouchableOpacity } from "react-native";
+import Toast from 'react-native-toast-message';
 import React from "react";
 import { Ionicons } from "@expo/vector-icons";
-import UploadToFirebase from "../Home/UploadToFirebase";
-import { collection, doc, setDoc } from "firebase/firestore";
+import { useAuth } from "../auth/AuthProvider";
 
-const Settings = [
+type IconName = "card" | "finger-print-outline" | "help-circle" | "log-out" | "chevron-forward";
+
+interface SettingItem {
+  name: string;
+  iconName: IconName;
+  color?: string;
+  onPress?: () => void;
+}
+
+const Settings: SettingItem[] = [
   {
     name: "Payment Method",
     iconName: "card",
@@ -24,21 +33,48 @@ const Settings = [
   },
 ];
 const ProfileSettings = () => {
-  const UploadToDatabase = async () => {
-    // try {
-    //   const response = await UploadToFirebase();
-    // } catch (error) {
-    //   console.error("Error uploading to Firebase:", error);
-    // }
+  const { signOut } = useAuth();
+
+  const handleItemPress = async (item: SettingItem) => {
+    if (item.name === "Log Out") {
+      try {
+        await signOut();
+        Toast.show({
+          type: 'success',
+          text1: 'Success',
+          text2: 'Successfully logged out'
+        });
+      } catch (error) {
+        console.error('Error logging out:', error);
+        Toast.show({
+          type: 'error',
+          text1: 'Error',
+          text2: 'Failed to log out. Please try again.'
+        });
+      }
+    }
   };
+
   return (
-    <View className="bg-white p-4 rounded-lg gap-4 ">
+    <View className="bg-white p-4 rounded-lg gap-4">
       {Settings.map((item) => (
-        <View className="flex flex-row w-full items-center gap-2 relative">
-          <Ionicons name={item.iconName} size={20} color={item.color} />
+        <TouchableOpacity
+          key={item.name}
+          className="flex flex-row w-full items-center gap-2 relative"
+          onPress={() => handleItemPress(item)}
+        >
+          <Ionicons
+            name={item.iconName as IconName}
+            size={20}
+            color={item.color || '#000'}
+          />
           <Text className={`w-4/5 text-lg  font-medium`}>{item.name}</Text>
-          <Ionicons name="chevron-forward" className="absolute right-0" />
-        </View>
+          <Ionicons
+            name="chevron-forward"
+            size={20}
+            className="absolute right-0"
+          />
+        </TouchableOpacity>
       ))}
     </View>
   );

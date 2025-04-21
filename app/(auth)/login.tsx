@@ -1,4 +1,5 @@
 import { View, Text, StyleSheet, TextInput, TouchableOpacity } from 'react-native';
+import Toast from 'react-native-toast-message';
 import { useState } from 'react';
 import { Link, useRouter } from 'expo-router';
 import { useAuth } from '../../components/auth/AuthProvider';
@@ -13,11 +14,31 @@ export default function LoginScreen() {
   const handleLogin = async () => {
     if (loading) return;
     
+    if (!email || !password) {
+      Toast.show({
+        type: 'error',
+        text1: 'Error',
+        text2: 'Please fill in all fields'
+      });
+      return;
+    }
+
     setError('');
     try {
       await signIn(email, password);
+      Toast.show({
+        type: 'success',
+        text1: 'Success',
+        text2: 'Login successful!'
+      });
     } catch (err: any) {
-      setError(err.message || 'An error occurred during login');
+      const errorMessage = err.message || 'An error occurred during login';
+      setError(errorMessage);
+      Toast.show({
+        type: 'error',
+        text1: 'Error',
+        text2: errorMessage
+      });
     }
   };
 
@@ -41,7 +62,6 @@ export default function LoginScreen() {
         placeholder="Password"
         value={password}
         onChangeText={setPassword}
-        secureTextEntry
       />
 
       <TouchableOpacity 
