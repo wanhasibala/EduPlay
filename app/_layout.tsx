@@ -1,6 +1,6 @@
-import { View, Text, StatusBar } from "react-native";
+import { StatusBar } from "react-native";
 import React, { useEffect } from "react";
-import { Tabs, Stack } from "expo-router";
+import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import {
   useFonts,
@@ -9,6 +9,7 @@ import {
   Poppins_600SemiBold,
   Poppins_700Bold,
 } from "@expo-google-fonts/poppins";
+import { AuthProvider } from '../components/auth/AuthProvider';
 
 import "../global.css";
 
@@ -34,10 +35,10 @@ const RootLayout = () => {
   }
 
   return (
-    <>
+    <AuthProvider>
       <StatusBar barStyle="dark-content" />
       <Stack screenOptions={{ headerShown: false }} />
-    </>
+    </AuthProvider>
   );
 };
 
