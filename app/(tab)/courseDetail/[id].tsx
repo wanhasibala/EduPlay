@@ -42,7 +42,7 @@ const CourseDetail = () => {
         options={{
           //@ts-ignore
           header: () => (
-            <Header title={"Course Detail"}  />
+            <Header title={"Course Detail"}  href=".." />
           ),
         }}
       />

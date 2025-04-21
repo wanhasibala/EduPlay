@@ -1,0 +1,9 @@
+id_lesson,course_id,title,content,video_url,order,type,duration,paid
+,,,,,,,,
+,,,,,,,,
+203,101,Wireframing Basics,Learn how to create effective wireframes.,https://www.youtube.com/watch?v=qpH7-KFWZRI,3,Video,25:00:00,TRUE
+204,101,Color Theory Workshop,Understanding color psychology and applying it to UI design.,https://www.youtube.com/watch?v=Qj1FK8n7WgY,4,Article,,TRUE
+205,101,Typography in UI Design,Master the art of choosing and pairing fonts.,https://www.youtube.com/watch?v=QrNi9FmdlxY,5,Video,18:00,TRUE
+206,101,Prototyping Tools,Hands-on practice with popular prototyping tools.,https://youtu.be/M9hg_vhxGxA?si=lPzQxfNIda9NWKAh,6,Video,30:00:00,FALSE
+207,101,User Testing Methods,Learn different approaches to user testing.,https://www.youtube.com/watch?v=RyGFpN5fJ2Q,7,Article,,TRUE
+208,101,Quiz,Instructions and requirements for the final project.,https://www.youtube.com/watch?v=hB6N5Bq3LIo,8,Quiz,,TRUE

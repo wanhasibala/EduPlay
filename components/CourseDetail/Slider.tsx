@@ -11,6 +11,7 @@ import {
 } from "react-native";
 import { COLORS } from "../constant/color";
 import { Ionicons } from "@expo/vector-icons";
+import { Link } from "expo-router";
 
 const { width } = Dimensions.get("screen");
 
@@ -142,7 +143,7 @@ const SliderItem = ({ item }: SliderItemProps) => {
     : `http://img.youtube.com/vi/default/maxresdefault.jpg`;
 
   return (
-    <Pressable style={styles.itemContainer}>
+    <Link style={styles.itemContainer} href={`(tab)/courseDetail/playlist/${item?.id_lesson}`}>
       <Image
         source={{ uri: thumbnailUrl }}
         style={styles.thumbnail}
@@ -151,7 +152,7 @@ const SliderItem = ({ item }: SliderItemProps) => {
       <View style={styles.duration}>
         <Text style={styles.durationText}>{item.duration}</Text>
       </View>
-    </Pressable>
+    </Link>
   );
 };
 

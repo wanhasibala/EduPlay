@@ -18,10 +18,12 @@
     "@expo-google-fonts/poppins": "^0.3.0",
     "@expo/vector-icons": "^14.0.2",
     "@firebase/storage": "^0.x.x",
+    "@react-native-async-storage/async-storage": "^2.1.2",
     "@react-native-firebase/app": "^21.6.1",
     "@react-native-firebase/storage": "^21.6.1",
     "@react-navigation/bottom-tabs": "^7.0.0",
     "@react-navigation/native": "^7.0.0",
+    "@supabase/supabase-js": "^2.49.4",
     "expo": "~52.0.10",
     "expo-av": "^15.0.2",
     "expo-blur": "~14.0.1",
@@ -49,6 +51,7 @@
     "react-native-screens": "~4.1.0",
     "react-native-web": "~0.19.13",
     "react-native-webview": "13.12.2",
+    "supabase": "^2.20.12",
     "tailwindcss": "^3.4.15"
   },
   "devDependencies": {

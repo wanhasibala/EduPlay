@@ -1,0 +1,4 @@
+id_quiz,course_id,question,options,correct_answer
+301,101,"What does UX stand for?","[{""option"":""User Experience""},{""option"":""User X-ray""},{""option"":""Ultra Experience""},{""option"":""Unique Experience""}]","User Experience"
+302,101,"Which of the following is a key principle of UI design?","[{""option"":""Consistency""},{""option"":""Randomness""},{""option"":""Complexity""},{""option"":""Disorganization""}]","Consistency"
+303,101,"What is the primary goal of UX design?","[{""option"":""Making interfaces beautiful""},{""option"":""Enhancing user satisfaction""},{""option"":""Increasing loading times""},{""option"":""Adding more animations""}]","Enhancing user satisfaction"
