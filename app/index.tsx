@@ -1,22 +1,22 @@
-import { View, Image, StyleSheet, ActivityIndicator, Text } from 'react-native';
-import { useEffect, useState } from 'react';
-import { useRouter, Redirect } from 'expo-router';
-import { useAuth } from '../components/auth/AuthProvider';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import Animated, { 
-  useAnimatedStyle, 
-  withTiming, 
+import { View, Image, StyleSheet, ActivityIndicator, Text } from "react-native";
+import { useEffect, useState } from "react";
+import { useRouter, Redirect } from "expo-router";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import Animated, {
+  useAnimatedStyle,
+  withTiming,
   useSharedValue,
-  withSequence 
-} from 'react-native-reanimated';
+  withSequence,
+} from "react-native-reanimated";
+import { useAuthContext } from "../contexts/AuthContext";
 
-const HAS_SEEN_ONBOARDING = 'hasSeenOnboarding';
+const HAS_SEEN_ONBOARDING = "hasSeenOnboarding";
 
 export default function Index() {
   const router = useRouter();
+  const { isLoading, user, token, hasCheckedAuth } = useAuthContext();
   const opacity = useSharedValue(0);
   const scale = useSharedValue(0.8);
-  const { session, loading } = useAuth();
   const [hasCheckedOnboarding, setHasCheckedOnboarding] = useState(false);
   const [hasSeenOnboarding, setHasSeenOnboarding] = useState(false);
 
@@ -28,13 +28,26 @@ export default function Index() {
   });
 
   useEffect(() => {
+    // Start animation
+    opacity.value = withSequence(
+      withTiming(1, { duration: 1000 }),
+      withTiming(1, { duration: 1000 })
+    );
+
+    scale.value = withSequence(
+      withTiming(1.1, { duration: 1000 }),
+      withTiming(1, { duration: 1000 })
+    );
+  }, [opacity, scale]);
+
+  useEffect(() => {
     const checkOnboarding = async () => {
       try {
         const value = await AsyncStorage.getItem(HAS_SEEN_ONBOARDING);
-        setHasSeenOnboarding(value === 'true');
+        setHasSeenOnboarding(value === "true");
         setHasCheckedOnboarding(true);
       } catch (error) {
-        console.log('Error checking onboarding status:', error);
+        console.log("Error checking onboarding status:", error);
         setHasSeenOnboarding(false);
         setHasCheckedOnboarding(true);
       }
@@ -44,85 +57,70 @@ export default function Index() {
   }, []);
 
   useEffect(() => {
-    // Start animation
-    opacity.value = withSequence(
-      withTiming(1, { duration: 1000 }),
-      withTiming(1, { duration: 1000 })
-    );
-    
-    scale.value = withSequence(
-      withTiming(1.1, { duration: 1000 }),
-      withTiming(1, { duration: 1000 })
-    );
-
-    // Wait for animation and checks to complete
-    const timer = setTimeout(() => {
-      if (!loading && hasCheckedOnboarding) {
+    // Wait for auth checks to complete
+    if (!isLoading && hasCheckedAuth && hasCheckedOnboarding) {
+      const timer = setTimeout(() => {
+        // Route based on authentication state and onboarding
         if (!hasSeenOnboarding) {
-          router.replace('/(onboarding)/welcome');
-        } else if (session) {
-          router.replace('/(tab)');
+          router.replace("/(onboarding)/welcome");
+        } else if (user && token) {
+          // User is authenticated, go to main app
+          router.replace("/(tab)");
         } else {
-          router.replace('/(auth)/login');
+          // No auth, go to login
+          router.replace("/(auth)/login");
         }
-      }
-    }, 2000);
+      }, 2000);
 
-    return () => clearTimeout(timer);
-  }, [loading, session, hasCheckedOnboarding, hasSeenOnboarding]);
+      return () => clearTimeout(timer);
+    }
+  }, [
+    isLoading,
+    hasCheckedAuth,
+    hasSeenOnboarding,
+    hasCheckedOnboarding,
+    user,
+    token,
+  ]);
 
-  // If still loading or checking onboarding, show splash screen
-  if (loading || !hasCheckedOnboarding) {
-    return (
-      <View style={styles.container}>
-        <Animated.View style={[styles.logoContainer, animatedStyles]}>
-          <Image
-            source={require('../assets/images/splash-icon.png')}
-            style={styles.logo}
-            resizeMode="contain"
-          />
-          <Text>Halo</Text>
-        </Animated.View>
-        <ActivityIndicator 
-          size="large" 
-          color="#007AFF" 
-          style={styles.loader}
+  // Show splash while loading
+  const isStillLoading = isLoading || !hasCheckedAuth || !hasCheckedOnboarding;
+
+  return (
+    <View style={styles.container}>
+      <Animated.View style={[styles.logoContainer, animatedStyles]}>
+        <Image
+          source={require("../assets/images/splash-icon.png")}
+          style={styles.logo}
+          resizeMode="contain"
         />
-      </View>
-    );
-  }
-
-  // After loading, redirect based on onboarding and auth state
-  if (!hasSeenOnboarding) {
-    return <Redirect href="/(onboarding)/welcome" />;
-  }
-  
-  return session ? (
-    <Redirect href="/(tab)" />
-  ) : (
-    <Redirect href="/(auth)/login" />
+      </Animated.View>
+      {isStillLoading && (
+        <ActivityIndicator size="large" color="#007AFF" style={styles.loader} />
+      )}
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: "#fff",
+    alignItems: "center",
+    justifyContent: "center",
   },
   logoContainer: {
     width: 200,
     height: 200,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   logo: {
-    width: '100%',
-    height: '100%',
+    width: "100%",
+    height: "100%",
   },
   loader: {
-    position: 'absolute',
+    position: "absolute",
     bottom: 50,
   },
 });

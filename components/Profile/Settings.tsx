@@ -1,10 +1,16 @@
 import { View, Text, TouchableOpacity } from "react-native";
-import Toast from 'react-native-toast-message';
+import { useToast } from "expo-toast";
 import React from "react";
 import { Ionicons } from "@expo/vector-icons";
-import { useAuth } from "../auth/AuthProvider";
+import { useRouter } from "expo-router";
+import { useAuthContext } from "../../contexts/AuthContext";
 
-type IconName = "card" | "finger-print-outline" | "help-circle" | "log-out" | "chevron-forward";
+type IconName =
+  | "card"
+  | "finger-print-outline"
+  | "help-circle"
+  | "log-out"
+  | "chevron-forward";
 
 interface SettingItem {
   name: string;
@@ -33,24 +39,20 @@ const Settings: SettingItem[] = [
   },
 ];
 const ProfileSettings = () => {
-  const { signOut } = useAuth();
+  const Toast = useToast();
+  const router = useRouter();
+  const { logout } = useAuthContext();
 
   const handleItemPress = async (item: SettingItem) => {
     if (item.name === "Log Out") {
       try {
-        await signOut();
-        Toast.show({
-          type: 'success',
-          text1: 'Success',
-          text2: 'Successfully logged out'
-        });
+        await logout();
+        Toast.show("Successfully logged out");
+        router.replace("/(auth)/login");
+        // Protected routes will automatically redirect to login
       } catch (error) {
-        console.error('Error logging out:', error);
-        Toast.show({
-          type: 'error',
-          text1: 'Error',
-          text2: 'Failed to log out. Please try again.'
-        });
+        console.error("Error logging out:", error);
+        Toast.show("Failed to log out. Please try again");
       }
     }
   };
@@ -60,13 +62,13 @@ const ProfileSettings = () => {
       {Settings.map((item) => (
         <TouchableOpacity
           key={item.name}
-          className="flex flex-row w-full items-center gap-2 relative"
+          className="flex flex-row w-full items-center gap-4 relative p-2"
           onPress={() => handleItemPress(item)}
         >
           <Ionicons
             name={item.iconName as IconName}
-            size={20}
-            color={item.color || '#000'}
+            size={24}
+            color={item.color || "#000"}
           />
           <Text className={`w-4/5 text-lg  font-medium`}>{item.name}</Text>
           <Ionicons

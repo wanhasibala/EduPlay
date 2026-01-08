@@ -11,6 +11,11 @@ module.exports = {
         "poppins-semibold": ["Poppins_600SemiBold"],
         "poppins-bold": ["Poppins_700Bold"],
       },
+      colors: {
+        primary: "#277BC0",
+        secondary: "#FFB200",
+        tertiary: "#6C63FF",
+      },
     },
   },
   plugins: [],

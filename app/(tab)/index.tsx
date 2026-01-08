@@ -3,7 +3,8 @@ import HeaderProfile from "@/components/Home/HeaderProfile";
 import { ListCourse } from "@/components/Home/itemPopular";
 import { RecentCourse } from "@/components/Home/recentCourse";
 import Search from "@/components/Home/Search";
-import { Text, View, SafeAreaView, ScrollView } from "react-native";
+import { Text, View, ScrollView } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function Index() {
   return (
@@ -12,9 +13,9 @@ export default function Index() {
         <View className="flex-1 mx-5 gap-5 mb-20">
           <HeaderProfile />
           {/* <Search /> */}
-          <Banner />
+          {/* <Banner /> */}
           <RecentCourse />
-          <ListCourse />
+          {/* <ListCourse /> */}
         </View>
       </ScrollView>
     </SafeAreaView>

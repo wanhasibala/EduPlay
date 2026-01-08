@@ -5,72 +5,67 @@ import {
   TextInput,
   TouchableOpacity,
 } from "react-native";
-import Toast from 'react-native-toast-message';
+import {useToast} from "expo-toast";
 import { useState } from "react";
 import { Link, useRouter } from "expo-router";
-import { useAuth } from "../../components/auth/AuthProvider";
 
 export default function RegisterScreen() {
   const router = useRouter();
-  const { signUp, loading } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const Toast = useToast();
 
   const handleRegister = async () => {
-    if (loading) return;
-
     if (!email || !password || !confirmPassword) {
       const message = "Please fill in all fields";
       setError(message);
-      Toast.show({
-        type: 'error',
-        text1: 'Error',
-        text2: message
-      });
+      Toast.show(message, );
       return;
     }
 
     if (password.length < 6) {
       const message = "Password must be at least 6 characters";
       setError(message);
-      Toast.show({
-        type: 'error',
-        text1: 'Error',
-        text2: message
-      });
+      // Toast.show({
+      //   type: "error",
+      //   text1: "Error",
+      //   text2: message,
+      // });
       return;
     }
 
     if (password !== confirmPassword) {
       const message = "Passwords do not match";
       setError(message);
-      Toast.show({
-        type: 'error',
-        text1: 'Error',
-        text2: message
-      });
+      // Toast.show({
+      //   type: "error",
+      //   text1: "Error",
+      //   text2: message,
+      // });
       return;
     }
 
     setError("");
     try {
-      await signUp(email, password);
-      Toast.show({
-        type: 'success',
-        text1: 'Success',
-        text2: 'Registration successful! Check your email to confirm your account.',
-        visibilityTime: 4000
-      });
+      // Toast.show({
+      //   type: "success",
+      //   text1: "Success",
+      //   text2:
+      //     "Registration successful! Check your email to confirm your account.",
+      //   visibilityTime: 4000,
+      // });
     } catch (err: any) {
-      const errorMessage = err.message || "An error occurred during registration";
+      const errorMessage =
+        err.message || "An error occurred during registration";
       setError(errorMessage);
-      Toast.show({
-        type: 'error',
-        text1: 'Error',
-        text2: errorMessage
-      });
+      // Toast.show({
+      //   type: "error",
+      //   text1: "Error",
+      //   text2: errorMessage,
+      // });
     }
   };
 
