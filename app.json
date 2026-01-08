@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "Course",
-    "slug": "Course",
+    "name": "EduPlay",
+    "slug": "eduplay",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",

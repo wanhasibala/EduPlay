@@ -48,7 +48,9 @@ const ProfileSettings = () => {
       try {
         await logout();
         Toast.show("Successfully logged out");
-        router.replace("/(auth)/login");
+        router.replace({
+          pathname: "/(auth)/login",
+        });
         // Protected routes will automatically redirect to login
       } catch (error) {
         console.error("Error logging out:", error);

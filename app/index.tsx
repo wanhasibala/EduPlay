@@ -84,22 +84,6 @@ export default function Index() {
   ]);
 
   // Show splash while loading
-  const isStillLoading = isLoading || !hasCheckedAuth || !hasCheckedOnboarding;
-
-  return (
-    <View style={styles.container}>
-      <Animated.View style={[styles.logoContainer, animatedStyles]}>
-        <Image
-          source={require("../assets/images/splash-icon.png")}
-          style={styles.logo}
-          resizeMode="contain"
-        />
-      </Animated.View>
-      {isStillLoading && (
-        <ActivityIndicator size="large" color="#007AFF" style={styles.loader} />
-      )}
-    </View>
-  );
 }
 
 const styles = StyleSheet.create({

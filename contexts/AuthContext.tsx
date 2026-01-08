@@ -2,11 +2,11 @@ import React, { createContext, useContext } from "react";
 import { useAuth as useAuthHook, AuthState, User } from "./useAuth";
 
 interface AuthContextType extends AuthState {
-  login: (email: string, password: string) => Promise<any>;
+  login: (loginResponse: any) => Promise<any>;
   register: (email: string, password: string, name: string) => Promise<any>;
   logout: () => Promise<any>;
   doRefreshToken: () => Promise<any>;
-  signIn: (email: string, password: string) => Promise<any>;
+  signIn: (loginResponse: any) => Promise<any>;
   signUp: (email: string, password: string, name: string) => Promise<any>;
   signOut: () => Promise<any>;
 }

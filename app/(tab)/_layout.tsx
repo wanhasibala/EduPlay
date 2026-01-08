@@ -1,6 +1,7 @@
 import { Stack, Tabs, usePathname } from "expo-router";
 import TabBar from "@/components/Layout/TabBar";
 import Header from "@/components/Layout/Header";
+import { useAuth } from "@/contexts/useAuth";
 
 export default function RootLayout() {
   const pathname = usePathname(); // Get the current route pathname
@@ -14,6 +15,8 @@ export default function RootLayout() {
   const shouldHideTabBar = hideTabBarRoutes.some((route) =>
     pathname.startsWith(route)
   );
+  const isSignIn = useAuth();
+  console.log(isSignIn);
   return (
     <Tabs
       tabBar={(props) => (!shouldHideTabBar ? <TabBar {...props} /> : null)}

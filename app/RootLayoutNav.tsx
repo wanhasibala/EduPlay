@@ -2,69 +2,33 @@ import React from "react";
 import { Stack } from "expo-router";
 import { useAuthContext } from "../contexts/AuthContext";
 
-/**
- * Protected Route Navigation
- * Handles authentication-based route protection
- *
- * Routes breakdown:
- * - (auth): Login/Register - Only accessible when NOT authenticated
- * - (onboarding): Onboarding screens - Only accessible when NOT authenticated
- * - (tab): Main app - Only accessible when authenticated
- * - index: Splash screen - Always accessible (loading screen)
- */
-
 export default function RootLayoutNav() {
-  const { token, hasCheckedAuth } = useAuthContext();
+  const { token, hasCheckedAuth, isLoading } = useAuthContext();
   const isAuthenticated = !!token;
 
   // Show nothing while checking authentication
-  if (!hasCheckedAuth) {
+  if (!hasCheckedAuth || isLoading) {
     return null;
   }
 
   return (
-    <Stack>
-      {/* Splash/Loading Screen - Always shown first */}
-      <Stack.Screen
-        name="index"
-        options={{
-          headerShown: false,
-          animation: "none",
-        }}
-      />
+    <Stack screenOptions={{ headerShown: false }}>
+      {/* Always show index screen for initial routing logic */}
+      <Stack.Screen name="index" />
 
-      {/* Authentication Screens - Only when NOT authenticated */}
-      <Stack.Protected guard={!isAuthenticated}>
-        <Stack.Screen
-          name="(auth)"
-          options={{
-            headerShown: false,
-            animation: "slide_from_right",
-          }}
-        />
-      </Stack.Protected>
-
-      {/* Onboarding Screens - Only when NOT authenticated */}
-      <Stack.Protected guard={!isAuthenticated}>
-        <Stack.Screen
-          name="(onboarding)"
-          options={{
-            headerShown: false,
-            animation: "slide_from_right",
-          }}
-        />
-      </Stack.Protected>
-
-      {/* Main App Screens - Only when authenticated */}
-      <Stack.Protected guard={isAuthenticated}>
-        <Stack.Screen
-          name="(tab)"
-          options={{
-            headerShown: false,
-            animation: "fade",
-          }}
-        />
-      </Stack.Protected>
+      {/* Conditional screens based on auth status */}
+      {!isAuthenticated ? (
+        <>
+          {/* Auth screens - only when not authenticated */}
+          <Stack.Screen name="(auth)" />
+          <Stack.Screen name="(onboarding)" />
+        </>
+      ) : (
+        <>
+          {/* Main app - only when authenticated */}
+          <Stack.Screen name="(tab)" />
+        </>
+      )}
     </Stack>
   );
 }

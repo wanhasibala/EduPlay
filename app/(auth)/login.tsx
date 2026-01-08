@@ -9,11 +9,10 @@ import { Image } from "expo-image";
 import { useToast } from "expo-toast";
 import { useState } from "react";
 import { Link, useRouter } from "expo-router";
-import { useCreateMutation, useLoginMutation } from "@/services/api";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import * as SecureStore from "expo-secure-store";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
+import { useAuthContext } from "@/contexts/AuthContext";
+import { useLoginMutation } from "@/services/api";
 
 export default function LoginScreen() {
   const router = useRouter();
@@ -21,8 +20,10 @@ export default function LoginScreen() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const Toast = useToast();
   const [login] = useLoginMutation();
+  const { signIn } = useAuthContext();
 
   const handleLogin = async () => {
     if (!email || !password) {
@@ -30,45 +31,35 @@ export default function LoginScreen() {
       return;
     }
 
+    setIsLoading(true);
+    setError("");
+
     try {
       console.log("🔐 Attempting login with:", email);
-      console.log("📡 API Base URL:", "http://192.168.100.20:8080"); // Check this matches your backend
 
+      // Call backend API to get login response
       const response = await login({
         email,
         password,
       }).unwrap();
 
-      console.log("✅ Login successful:", response);
+      console.log("✅ API Login successful:", response);
 
-      if (response?.error) {
-        throw new Error(response.error);
-      }
+      // Pass the API response to auth context to handle state management
+      await signIn(response);
 
-      const token = response.token;
-      const user = response.user;
-
-      // Store token in SecureStore (encrypted)
-      await SecureStore.setItemAsync("authToken", token);
-      if (response.refreshToken) {
-        await SecureStore.setItemAsync("refreshToken", response.refreshToken);
-      }
-
-      // Store user in AsyncStorage (non-sensitive)
-      await AsyncStorage.setItem("user", JSON.stringify(user));
-
+      console.log("✅ Auth context updated");
       Toast.show("Login successful!");
-      router.push("/(tab)");
+
+      // Navigation will happen automatically due to auth state change
+      // The RootLayoutNav will detect the auth state change and redirect
     } catch (err: any) {
       const errorMessage = err.message || "An error occurred during login";
       setError(errorMessage);
       console.error("❌ Login error:", JSON.stringify(err, null, 2));
-      console.error("Error details:", {
-        message: err.message,
-        status: err.status,
-        data: err.data,
-      });
       Toast.show(errorMessage);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -128,9 +119,13 @@ export default function LoginScreen() {
         </View>
         {error ? <Text style={styles.error}>{error}</Text> : null}
       </View>
-      <TouchableOpacity style={[styles.button]} onPress={handleLogin}>
+      <TouchableOpacity
+        style={[styles.button, isLoading && styles.buttonDisabled]}
+        onPress={handleLogin}
+        disabled={isLoading}
+      >
         <Text style={styles.buttonText} className="font-poppins">
-          {"Masuk"}
+          {isLoading ? "Signing in..." : "Masuk"}
         </Text>
       </TouchableOpacity>
 
