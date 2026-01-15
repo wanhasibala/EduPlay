@@ -4,6 +4,7 @@ import React from "react";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useAuthContext } from "../../contexts/AuthContext";
+import { supabase } from "../utils/supabase";
 
 type IconName =
   | "card"
@@ -20,10 +21,10 @@ interface SettingItem {
 }
 
 const Settings: SettingItem[] = [
-  {
-    name: "Payment Method",
-    iconName: "card",
-  },
+  // {
+  //   name: "Payment Method",
+  //   iconName: "card",
+  // },
   {
     name: "Change Password",
     iconName: "finger-print-outline",
@@ -47,7 +48,9 @@ const ProfileSettings = () => {
     if (item.name === "Log Out") {
       try {
         await logout();
+        await supabase.auth.signOut();
         Toast.show("Successfully logged out");
+
         router.replace({
           pathname: "/(auth)/login",
         });

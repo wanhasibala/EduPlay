@@ -1,12 +1,13 @@
 import React, { createContext, useContext } from "react";
 import { useAuth as useAuthHook, AuthState, User } from "./useAuth";
+import { AuthPayload } from "@/services/supabaseApi";
 
 interface AuthContextType extends AuthState {
-  login: (loginResponse: any) => Promise<any>;
+  login: (loginResponse: AuthPayload) => Promise<any>;
   register: (email: string, password: string, name: string) => Promise<any>;
   logout: () => Promise<any>;
   doRefreshToken: () => Promise<any>;
-  signIn: (loginResponse: any) => Promise<any>;
+  signIn: (loginResponse: AuthPayload) => Promise<any>;
   signUp: (email: string, password: string, name: string) => Promise<any>;
   signOut: () => Promise<any>;
 }

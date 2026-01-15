@@ -15,8 +15,6 @@ export default function RootLayout() {
   const shouldHideTabBar = hideTabBarRoutes.some((route) =>
     pathname.startsWith(route)
   );
-  const isSignIn = useAuth();
-  console.log(isSignIn);
   return (
     <Tabs
       tabBar={(props) => (!shouldHideTabBar ? <TabBar {...props} /> : null)}

@@ -11,8 +11,6 @@ import {
 
 import "../global.css";
 import { ToastProvider } from "expo-toast";
-import { Provider } from "react-redux";
-import { store } from "../store/store";
 import { AuthProvider } from "../contexts/AuthContext";
 import RootLayoutNav from "./RootLayoutNav";
 
@@ -38,13 +36,11 @@ export default function RootLayout() {
   }
 
   return (
-    <Provider store={store}>
-      <AuthProvider>
-        <ToastProvider>
-          <StatusBar barStyle="dark-content" />
-          <RootLayoutNav />
-        </ToastProvider>
-      </AuthProvider>
-    </Provider>
+    <AuthProvider>
+      <ToastProvider>
+        <StatusBar barStyle="dark-content" />
+        <RootLayoutNav />
+      </ToastProvider>
+    </AuthProvider>
   );
 }

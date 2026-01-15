@@ -1,18 +1,28 @@
 import { View, Text } from "react-native";
-import React from "react";
+import React, { useEffect } from "react";
 import { Ionicons } from "@expo/vector-icons";
 import { Link } from "expo-router";
 import { useAuthContext } from "../../contexts/AuthContext";
+import { supabase } from "../utils/supabase";
 
 const HeaderProfile = () => {
-  const { user } = useAuthContext();
+  const [user, setUser] = React.useState<any>(null);
+  useEffect(() => {
+    const fetchUser = async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      setUser(user);
+    };
+    fetchUser();
+  }, []);
 
   return (
     <View className="flex flex-row mt-4 justify-between items-center">
       <View className="flex-col gap-2">
         <Text className="font-poppins">Welcome</Text>
         <Text className="text-4xl font-poppins-medium">
-          {user?.name || "Guest"}
+          {user?.user_metadata?.name || "Guest"}
         </Text>
       </View>
       <Link href={user ? "/(tab)/profile" : "/(auth)/login"}>

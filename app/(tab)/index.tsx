@@ -14,8 +14,8 @@ export default function Index() {
           <HeaderProfile />
           {/* <Search /> */}
           {/* <Banner /> */}
-          <RecentCourse />
-          {/* <ListCourse /> */}
+          {/* <RecentCourse /> */}
+          <ListCourse />
         </View>
       </ScrollView>
     </SafeAreaView>

@@ -1,6 +1,8 @@
 import { useReducer, useEffect } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as SecureStore from "expo-secure-store";
+import { supabase } from "@/components/utils/supabase";
+import { signUpWithEmail, AuthPayload } from "@/services/supabaseApi";
 
 export interface User {
   id: string;
@@ -20,14 +22,19 @@ export interface AuthState {
 }
 
 type AuthAction =
-  | { type: 'RESTORE_TOKEN'; token: string | null; user: User | null; refreshToken: string | null }
-  | { type: 'SIGN_IN'; token: string; user: User; refreshToken: string | null }
-  | { type: 'SIGN_OUT' }
-  | { type: 'SET_LOADING'; isLoading: boolean };
+  | {
+      type: "RESTORE_TOKEN";
+      token: string | null;
+      user: User | null;
+      refreshToken: string | null;
+    }
+  | { type: "SIGN_IN"; token: string; user: User; refreshToken: string | null }
+  | { type: "SIGN_OUT" }
+  | { type: "SET_LOADING"; isLoading: boolean };
 
 const authReducer = (state: AuthState, action: AuthAction): AuthState => {
   switch (action.type) {
-    case 'RESTORE_TOKEN':
+    case "RESTORE_TOKEN":
       return {
         ...state,
         token: action.token,
@@ -37,7 +44,7 @@ const authReducer = (state: AuthState, action: AuthAction): AuthState => {
         isSignout: !action.token,
         hasCheckedAuth: true,
       };
-    case 'SIGN_IN':
+    case "SIGN_IN":
       return {
         ...state,
         token: action.token,
@@ -47,7 +54,7 @@ const authReducer = (state: AuthState, action: AuthAction): AuthState => {
         isSignout: false,
         hasCheckedAuth: true,
       };
-    case 'SIGN_OUT':
+    case "SIGN_OUT":
       return {
         ...state,
         token: null,
@@ -57,7 +64,7 @@ const authReducer = (state: AuthState, action: AuthAction): AuthState => {
         isSignout: true,
         hasCheckedAuth: true,
       };
-    case 'SET_LOADING':
+    case "SET_LOADING":
       return {
         ...state,
         isLoading: action.isLoading,
@@ -65,6 +72,29 @@ const authReducer = (state: AuthState, action: AuthAction): AuthState => {
     default:
       return state;
   }
+};
+
+const mapSupabaseUser = (user: any): User => ({
+  id: user?.id ?? "",
+  email: user?.email ?? "",
+  name:
+    user?.user_metadata?.name ??
+    user?.email?.split("@")[0] ??
+    user?.name ??
+    "User",
+  avatar: user?.user_metadata?.avatar_url,
+});
+
+const persistAuthState = async (
+  token: string,
+  user: User,
+  refreshToken?: string | null
+) => {
+  await SecureStore.setItemAsync("authToken", token);
+  if (refreshToken) {
+    await SecureStore.setItemAsync("refreshToken", refreshToken);
+  }
+  await AsyncStorage.setItem("user", JSON.stringify(user));
 };
 
 export const useAuth = () => {
@@ -91,7 +121,7 @@ export const useAuth = () => {
         const user = userJson ? JSON.parse(userJson) : null;
 
         dispatch({
-          type: 'RESTORE_TOKEN',
+          type: "RESTORE_TOKEN",
           token,
           user,
           refreshToken,
@@ -99,7 +129,7 @@ export const useAuth = () => {
       } catch (e) {
         console.error("Failed to restore token:", e);
         dispatch({
-          type: 'RESTORE_TOKEN',
+          type: "RESTORE_TOKEN",
           token: null,
           user: null,
           refreshToken: null,
@@ -112,23 +142,16 @@ export const useAuth = () => {
 
   const authContext = {
     ...state,
-    signIn: async (loginResponse: any) => {
+    signIn: async (loginResponse: AuthPayload) => {
       try {
-        dispatch({ type: 'SET_LOADING', isLoading: true });
-        
+        dispatch({ type: "SET_LOADING", isLoading: true });
+
         const { token, refreshToken, user } = loginResponse;
 
-        // Store token in SecureStore
-        await SecureStore.setItemAsync("authToken", token);
-        if (refreshToken) {
-          await SecureStore.setItemAsync("refreshToken", refreshToken);
-        }
-
-        // Store user in AsyncStorage
-        await AsyncStorage.setItem("user", JSON.stringify(user));
+        await persistAuthState(token, user, refreshToken);
 
         dispatch({
-          type: 'SIGN_IN',
+          type: "SIGN_IN",
           token,
           user,
           refreshToken: refreshToken || null,
@@ -137,53 +160,46 @@ export const useAuth = () => {
         return { success: true, data: loginResponse };
       } catch (error) {
         console.error("Sign in error:", error);
-        dispatch({ type: 'SET_LOADING', isLoading: false });
+        dispatch({ type: "SET_LOADING", isLoading: false });
         throw error;
       }
     },
 
     signUp: async (email: string, password: string, name: string) => {
       try {
-        dispatch({ type: 'SET_LOADING', isLoading: true });
-        
-        // TODO: Replace with actual API call
-        // For now, simulate a successful registration for demo purposes
-        const demoResponse = {
-          token: 'demo_auth_token_' + Date.now(),
-          refreshToken: 'demo_refresh_token_' + Date.now(),
-          user: {
-            id: Date.now().toString(),
-            email: email,
-            name: name,
-            avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=' + email
-          }
-        };
+        dispatch({ type: "SET_LOADING", isLoading: true });
+        const { authPayload, message } = await signUpWithEmail(
+          email,
+          password,
+          name
+        );
 
-        // Simulate network delay
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        if (authPayload) {
+          await persistAuthState(
+            authPayload.token,
+            authPayload.user,
+            authPayload.refreshToken
+          );
 
-        const { token, refreshToken, user } = demoResponse;
+          dispatch({
+            type: "SIGN_IN",
+            token: authPayload.token,
+            user: authPayload.user,
+            refreshToken: authPayload.refreshToken,
+          });
 
-        // Store token in SecureStore
-        await SecureStore.setItemAsync("authToken", token);
-        if (refreshToken) {
-          await SecureStore.setItemAsync("refreshToken", refreshToken);
+          return { success: true, data: authPayload };
         }
 
-        // Store user in AsyncStorage
-        await AsyncStorage.setItem("user", JSON.stringify(user));
+        dispatch({ type: "SET_LOADING", isLoading: false });
 
-        dispatch({
-          type: 'SIGN_IN',
-          token,
-          user,
-          refreshToken: refreshToken || null,
-        });
-
-        return { success: true, data: demoResponse };
+        return {
+          success: true,
+          data: { message },
+        };
       } catch (error) {
         console.error("Sign up error:", error);
-        dispatch({ type: 'SET_LOADING', isLoading: false });
+        dispatch({ type: "SET_LOADING", isLoading: false });
         throw error;
       }
     },
@@ -200,7 +216,7 @@ export const useAuth = () => {
         // Clear AsyncStorage
         await AsyncStorage.removeItem("user");
 
-        dispatch({ type: 'SIGN_OUT' });
+        dispatch({ type: "SIGN_OUT" });
 
         return { success: true };
       } catch (error) {
@@ -211,42 +227,28 @@ export const useAuth = () => {
 
     doRefreshToken: async () => {
       try {
-        if (!state.refreshToken) {
-          throw new Error("No refresh token available");
+        const { data, error } = await supabase.auth.refreshSession();
+
+        if (error || !data.session || !data.user) {
+          throw new Error(error?.message || "Token refresh failed");
         }
 
-        // TODO: Replace with actual API call
-        const response = await fetch("YOUR_API_URL/refresh", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${state.refreshToken}`,
-          },
+        const mappedUser = mapSupabaseUser(data.user);
+
+        await persistAuthState(
+          data.session.access_token,
+          mappedUser,
+          data.session.refresh_token
+        );
+
+        dispatch({
+          type: "SIGN_IN",
+          token: data.session.access_token,
+          user: mappedUser,
+          refreshToken: data.session.refresh_token ?? state.refreshToken,
         });
 
-        const data = await response.json();
-
-        if (response.ok) {
-          const { token, refreshToken } = data;
-
-          // Update token in SecureStore
-          await SecureStore.setItemAsync("authToken", token);
-          if (refreshToken) {
-            await SecureStore.setItemAsync("refreshToken", refreshToken);
-          }
-
-          // Update state with new tokens
-          dispatch({
-            type: 'SIGN_IN',
-            token,
-            user: state.user!,
-            refreshToken: refreshToken || state.refreshToken,
-          });
-
-          return { success: true, data };
-        } else {
-          throw new Error(data.message || "Token refresh failed");
-        }
+        return { success: true, data };
       } catch (error) {
         console.error("Token refresh error:", error);
         // On refresh failure, sign out the user

@@ -1,37 +1,65 @@
-import {
-  View,
-  FlatList,
-  Text,
-  TouchableOpacity,
-  Image,
-  StyleSheet,
-} from "react-native";
+import { View, Text, Image, StyleSheet } from "react-native";
 import { useState, useEffect } from "react";
-import data from "@/data/data.json";
 import { COLORS } from "@/components/constant/color";
 import { Link } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import { Course, User } from "@/types/index";
+import { CourseSummary, fetchCourses } from "@/services/supabaseApi";
+import { supabase } from "../utils/supabase";
 
 export const ListCourse = () => {
-  const [course, setCourses] = useState<Course[]>([]);
-  const [users, setUsers] = useState<User[]>([]);
+  const [courses, setCourses] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    setCourses(data.courses);
-    setUsers(data.users);
-  }, []); // Add dependency array to prevent infinite re-render
+    let isMounted = true;
 
-  const getInstructorName = (instructorId: number): User => {
-    const instructor = users.find((user) => user.id_user === instructorId);
-    return (
-      instructor || {
-        id_user: 0,
-        name: "Unknown Instructor",
-        profile_image: null,
+    const loadCourses = async () => {
+      setIsLoading(true);
+      setError(null);
+      try {
+        const { data: result, error } = await supabase.from(
+          "internship_courses"
+        ).select(`
+    *,
+    user_profiles!mentor_id(*)
+  `);
+        if (isMounted) {
+          setCourses(result || []);
+        }
+      } catch (err: any) {
+        if (isMounted) {
+          setError(err?.message ?? "Failed to load courses");
+        }
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+        }
       }
+    };
+
+    loadCourses();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  if (isLoading) {
+    return (
+      <View>
+        <Text>Loading...</Text>
+      </View>
     );
-  };
+  }
+
+  if (error) {
+    return (
+      <View>
+        <Text>{error}</Text>
+      </View>
+    );
+  }
 
   return (
     <View>
@@ -45,20 +73,17 @@ export const ListCourse = () => {
         <Text style={styles.title}> Popular</Text>
         <Text className="font-poppins"> Lihat semua</Text>
       </View>
-      <FlatList
-        data={course}
-        renderItem={({ item }) => (
-          <ItemPopular
-            title={item.title}
-            mentor={getInstructorName(item.instructor_id).name}
-            duration={item.duration}
-            image={item.course_image}
-            mentorImage={getInstructorName(item.instructor_id).profile_image}
-            id={item.id_course}
-          />
-        )}
-        keyExtractor={(item) => item.id_course.toString()} // Ensure unique key as string
-      />
+      {courses.map((item) => (
+        <ItemPopular
+          key={item.id}
+          title={item.title}
+          duration={item?.duration}
+          image={item.image_url}
+          mentor={item.user_profiles?.name}
+          mentorImage={item.user_profiles?.profile_image}
+          id={item.id}
+        />
+      ))}
     </View>
   );
 };
@@ -73,7 +98,7 @@ const ItemPopular = ({
 }: {
   title: string;
   image: string;
-  mentor: string;
+  mentor?: string;
   duration: string;
   mentorImage?: string;
   id: number;
@@ -112,7 +137,7 @@ const ItemPopular = ({
             </Text>
           </View>
           <Text style={{ fontSize: 14 }} className="font-poppins">
-            {duration}{" "}
+            {duration} Minutes
           </Text>
         </View>
         <Ionicons

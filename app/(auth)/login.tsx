@@ -12,18 +12,18 @@ import { Link, useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useAuthContext } from "@/contexts/AuthContext";
-import { useLoginMutation } from "@/services/api";
+import { loginWithEmail } from "@/services/supabaseApi";
+import { supabase } from "@/utils/supabase";
 
 export default function LoginScreen() {
-  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const Toast = useToast();
-  const [login] = useLoginMutation();
   const { signIn } = useAuthContext();
+  const router = useRouter();
 
   const handleLogin = async () => {
     if (!email || !password) {
@@ -35,26 +35,27 @@ export default function LoginScreen() {
     setError("");
 
     try {
-      console.log("🔐 Attempting login with:", email);
-
-      // Call backend API to get login response
-      const response = await login({
+      const loginResponse = await supabase.auth.signInWithPassword({
         email,
         password,
-      }).unwrap();
+      });
+      console.log("✅ Login response:", JSON.stringify(loginResponse, null, 2));
 
-      console.log("✅ API Login successful:", response);
+      if (loginResponse.error) {
+        throw loginResponse.error;
+      }
 
-      // Pass the API response to auth context to handle state management
-      await signIn(response);
-
-      console.log("✅ Auth context updated");
       Toast.show("Login successful!");
-
+      await signIn({
+        token: loginResponse.data.session?.access_token || "",
+        refreshToken: loginResponse.data.session?.refresh_token || "",
+        user: loginResponse.data.user,
+      });
       // Navigation will happen automatically due to auth state change
       // The RootLayoutNav will detect the auth state change and redirect
+      router.push("/(tab)");
     } catch (err: any) {
-      const errorMessage = err.message || "An error occurred during login";
+      const errorMessage = err?.message || "An error occurred during login";
       setError(errorMessage);
       console.error("❌ Login error:", JSON.stringify(err, null, 2));
       Toast.show(errorMessage);

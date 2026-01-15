@@ -1,56 +1,114 @@
-import {
-  View,
-  Text,
-  SafeAreaView,
-  Image,
-  FlatList,
-  Pressable,
-  ScrollView,
-} from "react-native";
-import React from "react";
-import { Link, Stack, useLocalSearchParams, useNavigation } from "expo-router";
-import data from "@/data/data.json";
+import { View, Text, SafeAreaView, ScrollView, FlatList } from "react-native";
+import React, { useEffect, useState } from "react";
+import { Link, Stack, useLocalSearchParams } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import Header from "@/components/Layout/Header";
-import { Slider } from "@/components/CourseDetail/Slider";
+import { CourseSummary, fetchCourseById } from "@/services/supabaseApi";
+import { supabase } from "@/utils/supabase";
 import ContentPreview from "@/components/CourseDetail/ContentPreview";
-import { navigate } from "expo-router/build/global-state/routing";
 
 const CourseDetail = () => {
-  const navigate = useNavigation();
   const params = useLocalSearchParams();
-  // const id = params.id ? Number(params.id) : null;
+  const [course, setCourse] = useState<CourseSummary | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const course = data.courses.find(
-    (item) => item.id_course === Number(params.id)
-  );
-  const video = data.lessons.filter(
-    (item) => item.course_id === course?.id_course
-  );
-  const slider = data.lessons.filter(
-    (item) =>
-      item.course_id === course?.id_course &&
-      item.type === "Video" &&
-      item.paid === false
-  );
-  const instructor = data.users.find(
-    (item) => course?.instructor_id === item.id_user
-  );
+  const courseId = Array.isArray(params.id)
+    ? Number(params.id[0])
+    : params.id
+    ? Number(params.id)
+    : null;
+
+  useEffect(() => {
+    let isMounted = true;
+
+    if (!courseId) {
+      setError("Course not found");
+      return undefined;
+    }
+
+    const loadCourse = async () => {
+      setIsLoading(true);
+      setError(null);
+      try {
+        const result = await supabase
+          .from("internship_courses")
+          .select(
+            `
+    *,
+    user_profiles!mentor_id(*),
+    course_modules(*, course_lessons(*))
+  `
+          )
+          .eq("id", courseId)
+          .single();
+        console.log(result.data);
+        if (isMounted) {
+          setCourse(result.data || null);
+        }
+      } catch (err: any) {
+        if (isMounted) {
+          setError(err?.message ?? "Failed to load course");
+        }
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    loadCourse();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [courseId]);
+
+  if (isLoading) {
+    return (
+      <SafeAreaView style={{ flex: 1 }}>
+        <Stack.Screen
+          options={{
+            //@ts-ignore
+            header: () => <Header title={"Course Detail"} href=".." />,
+          }}
+        />
+        <View className="flex-1 items-center justify-center">
+          <Text>Loading course...</Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  if (error || !course) {
+    return (
+      <SafeAreaView style={{ flex: 1 }}>
+        <Stack.Screen
+          options={{
+            //@ts-ignore
+            header: () => <Header title={"Course Detail"} href=".." />,
+          }}
+        />
+        <View className="flex-1 items-center justify-center px-5">
+          <Text className="text-center">{error ?? "Course not found"}</Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <Stack.Screen
         options={{
           //@ts-ignore
-          header: () => (
-            <Header title={"Course Detail"}  href=".." />
-          ),
+          header: () => <Header title={"Course Detail"} href=".." />,
         }}
       />
       <ScrollView className="px-5 ">
         <View className="mb-32">
           <View>
             {/* @ts-ignore  */}
-            <Slider data={slider} />
+            {/* <Slider data={slider} /> */}
           </View>
 
           <View>
@@ -63,14 +121,14 @@ const CourseDetail = () => {
               </Text>
               <View className="flex flex-row justify-between ">
                 <View className="flex flex-row place-items-center gap-2 mt-2">
-                  <Image
+                  {/* <Image
                     source={{ uri: instructor?.profile_image }}
                     width={20}
                     height={20}
                     className="rounded-full"
-                  />
+                  /> */}
                   <Text style={{ fontSize: 16 }} className="font-poppins">
-                    {instructor?.name}
+                    {course?.mon}
                   </Text>
                 </View>
                 <View className="flex flex-row p-2 gap-2 bg-[#FFF0CC] rounded-md">
@@ -79,7 +137,7 @@ const CourseDetail = () => {
                     style={{ fontSize: 18, fontWeight: "600" }}
                     className="font-poppins-medium"
                   >
-                    {course?.rating}
+                    {course?.rating ?? 0}
                   </Text>
                 </View>
               </View>
@@ -102,18 +160,19 @@ const CourseDetail = () => {
                 Preview
               </Text>
               <FlatList
-                data={video}
+                data={course?.course_modules}
                 renderItem={({ item }) => (
                   <ContentPreview
-                    id={item.id_lesson.toString()}
+                    id={item.id.toString()}
                     title={item.title}
                     order={item.order}
                     type={item.type}
                     duration={item.duration}
                     paid={item.paid}
+                    lessons={item.course_lessons}
                   />
                 )}
-                keyExtractor={(item) => item?.id_lesson.toString()}
+                keyExtractor={(item) => item?.id.toString()}
                 contentContainerStyle={{ gap: 10 }}
               />
             </View>
@@ -127,7 +186,7 @@ const CourseDetail = () => {
           width: "100%",
           paddingHorizontal: 20,
         }}
-        href={`/enroll/${course?.id_course}`}
+        href={`/enroll/${course?.id}`}
       >
         <View
           style={{

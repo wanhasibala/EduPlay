@@ -5,9 +5,10 @@ import {
   TextInput,
   TouchableOpacity,
 } from "react-native";
-import {useToast} from "expo-toast";
+import { useToast } from "expo-toast";
 import { useState } from "react";
 import { Link, useRouter } from "expo-router";
+import { useAuthContext } from "@/contexts/AuthContext";
 
 export default function RegisterScreen() {
   const router = useRouter();
@@ -17,12 +18,13 @@ export default function RegisterScreen() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const Toast = useToast();
+  const { signUp } = useAuthContext();
 
   const handleRegister = async () => {
     if (!email || !password || !confirmPassword) {
       const message = "Please fill in all fields";
       setError(message);
-      Toast.show(message, );
+      Toast.show(message);
       return;
     }
 
@@ -50,13 +52,15 @@ export default function RegisterScreen() {
 
     setError("");
     try {
-      // Toast.show({
-      //   type: "success",
-      //   text1: "Success",
-      //   text2:
-      //     "Registration successful! Check your email to confirm your account.",
-      //   visibilityTime: 4000,
-      // });
+      setLoading(true);
+      const result = await signUp(email, password, email.split("@")[0]);
+
+      const confirmationMessage =
+        (result?.data as any)?.message ||
+        "Registration successful! Check your email to confirm your account.";
+
+      Toast.show(confirmationMessage);
+      router.replace("/(auth)/login");
     } catch (err: any) {
       const errorMessage =
         err.message || "An error occurred during registration";
@@ -66,6 +70,8 @@ export default function RegisterScreen() {
       //   text1: "Error",
       //   text2: errorMessage,
       // });
+    } finally {
+      setLoading(false);
     }
   };
 
