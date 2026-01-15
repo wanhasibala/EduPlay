@@ -7,9 +7,9 @@ import {
   FlatList,
   Dimensions,
 } from "react-native";
-import WebView from 'react-native-webview';
+import WebView from "react-native-webview";
 import { Ionicons } from "@expo/vector-icons";
-import React, { useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Stack, useLocalSearchParams, Link } from "expo-router";
 import { courses, users, lessons } from "@/data/data.json";
@@ -17,6 +17,7 @@ import Header from "@/components/Layout/Header";
 import { getYouTubeThumbnail } from "@/components/CourseDetail/Slider";
 import { COLORS } from "@/components/constant/color";
 import { Lesson, DataType } from "@/types";
+import { supabase } from "@/utils/supabase";
 
 interface LessonItemProps {
   item: Lesson;
@@ -24,7 +25,8 @@ interface LessonItemProps {
 }
 
 const getYouTubeVideoId = (url: string) => {
-  const regex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
+  const regex =
+    /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
   const match = url?.match(regex);
   return match ? match[1] : null;
 };
@@ -32,38 +34,71 @@ const getYouTubeVideoId = (url: string) => {
 const Playlist = () => {
   const params = useLocalSearchParams();
   const currentLessonId = Number(params.id);
+  const [lessons, setLessons] = useState<any>(null);
+  const [otherLessons, setOtherLessons] = useState<any>();
+  const [instructor, setInstructor] = useState<any>(null);
+  useEffect(() => {
+    const fetchLessons = async () => {
+      try {
+        const { data, error } = await supabase
+          .from("course_lessons")
+          .select(
+            "*, course_modules(*, internship_courses(*, user_profiles!mentor_id(*)))"
+          )
+          .eq("id", currentLessonId)
+          .single();
+        const { data: other, error: errorOther } = await supabase
+          .from("course_lessons")
+          .select("*")
+          .neq("id", currentLessonId)
+          .eq("module_id", data?.module_id)
+          .order("id", { ascending: true });
+        const instructor =
+          data?.course_modules.internship_courses.user_profiles;
+        setInstructor(instructor);
+        if (error) {
+          throw error;
+        }
+        setLessons(data);
+        setOtherLessons(other);
+      } catch (error) {
+        console.error("Error fetching lessons:", error);
+      }
+    };
+    fetchLessons();
+  }, [currentLessonId]);
 
-  // Type assert the data from json
-  const typedLessons = lessons as DataType['lessons'];
-  const typedCourses = courses as DataType['courses'];
-  const typedUsers = users as DataType['users'];
+  // Memoize lesson organization
+  const { previousLesson, nextLesson, sortedPlaylist } = useMemo(() => {
+    if (!otherLessons || otherLessons.length === 0) {
+      return { previousLesson: null, nextLesson: null, sortedPlaylist: [] };
+    }
 
-  const lesson = typedLessons.find((item) => item.id_lesson === currentLessonId);
-  const course = typedCourses.find(
-    (course) => course.id_course === lesson?.course_id
-  );
-  const instructor = typedUsers.find((item) => item.id_user === course?.instructor_id);
+    const allLessons = [lessons, ...otherLessons].filter(Boolean);
+    const sortedLessons = allLessons.sort((a, b) => (a.id || 0) - (b.id || 0));
 
-  const { sortedPlaylist, currentIndex } = useMemo(() => {
-    const playlist = typedLessons
-      .filter((item) => item.course_id === lesson?.course_id)
-      .sort((a, b) => a.order - b.order);
-    const index = playlist.findIndex((item) => item.id_lesson === currentLessonId);
-    return { sortedPlaylist: playlist, currentIndex: index };
-  }, [lesson?.course_id, currentLessonId]);
+    const currentIndex = sortedLessons.findIndex(
+      (lesson) => lesson.id === currentLessonId
+    );
 
-  const previousLesson = currentIndex > 0 ? sortedPlaylist[currentIndex - 1] : null;
-  const nextLesson = currentIndex < sortedPlaylist.length - 1 ? sortedPlaylist[currentIndex + 1] : null;
+    return {
+      previousLesson: currentIndex > 0 ? sortedLessons[currentIndex - 1] : null,
+      nextLesson:
+        currentIndex !== -1 && currentIndex < sortedLessons.length - 1
+          ? sortedLessons[currentIndex + 1]
+          : null,
+      sortedPlaylist: sortedLessons,
+    };
+  }, [lessons, otherLessons, currentLessonId]);
 
-  const thumbnailUrl = lesson?.video_url
-    ? getYouTubeThumbnail(lesson.video_url)
-    : `http://img.youtube.com/vi/default/maxresdefault.jpg`;
-
-  const renderLessonItem = ({ item, isCurrentLesson = false }: LessonItemProps) => (
+  const renderLessonItem = ({
+    item,
+    isCurrentLesson = false,
+  }: LessonItemProps) => (
     <Link
       href={{
         pathname: "/courseDetail/playlist/[id]",
-        params: { id: item.id_lesson }
+        params: { id: item.id_lesson },
       }}
       asChild
     >
@@ -82,14 +117,18 @@ const Playlist = () => {
         </View>
         <View className="flex-1 justify-between flex-row items-center">
           <View className="gap-2 flex-1 mr-4">
-            <Text 
-              numberOfLines={1} 
-              className={`text-lg font-poppins-medium ${isCurrentLesson ? 'text-[#007AFF]' : ''}`}
+            <Text
+              numberOfLines={1}
+              className={`text-lg font-poppins-medium ${
+                isCurrentLesson ? "text-[#007AFF]" : ""
+              }`}
             >
               {item.title}
             </Text>
             {item.duration && (
-              <Text className="text-sm font-poppins text-gray-600">{item.duration}</Text>
+              <Text className="text-sm font-poppins text-gray-600">
+                {item.duration}
+              </Text>
             )}
           </View>
           {isCurrentLesson && (
@@ -108,16 +147,16 @@ const Playlist = () => {
         }}
       />
       <Header
-        title={lesson?.title || ""}
-        href={`/(tab)/courseDetail/${lesson?.course_id}`}
+        title={lessons?.title || ""}
+        href={`/(tab)/courseDetail/${lessons?.course_modules?.internship_courses.id}`}
       />
       <ScrollView className="bg-white">
         {/* VideoPlayer */}
         <View className="aspect-video relative">
-          {lesson?.video_url ? (
+          {lessons?.video_url ? (
             <WebView
               source={{
-                uri: `https://www.youtube.com/embed/${getYouTubeVideoId(lesson?.video_url)}?playsinline=1&autoplay=0`,
+                uri: `${lessons.video_url}`,
               }}
               className="aspect-video"
               allowsFullscreenVideo
@@ -126,13 +165,17 @@ const Playlist = () => {
               startInLoadingState
               renderLoading={() => (
                 <View className="absolute inset-0 items-center justify-center bg-black/20">
-                  <Text className="text-white font-poppins-medium">Loading...</Text>
+                  <Text className="text-white font-poppins-medium">
+                    Loading...
+                  </Text>
                 </View>
               )}
             />
           ) : (
             <View className="aspect-video items-center justify-center bg-gray-200">
-              <Text className="text-gray-600 font-poppins-medium">No video available</Text>
+              <Text className="text-gray-600 font-poppins-medium">
+                No video available
+              </Text>
             </View>
           )}
         </View>
@@ -147,44 +190,58 @@ const Playlist = () => {
           )}
           <View className="flex-1">
             <Text numberOfLines={1} className="text-xl font-poppins-medium">
-              {lesson?.title}
+              {lessons?.title}
             </Text>
             {instructor && (
-              <Text className="text-sm font-poppins text-gray-600">{instructor.name}</Text>
+              <Text className="text-sm font-poppins text-gray-600">
+                {instructor.name}
+              </Text>
             )}
           </View>
-          {lesson?.duration && (
-            <Text className="text-sm font-poppins text-gray-600">{lesson.duration}</Text>
+          {lessons?.duration && (
+            <Text className="text-sm font-poppins text-gray-600">
+              {lessons.duration}
+            </Text>
           )}
         </View>
 
         {/* Playlist */}
         <View className="mt-5 px-5">
-          {previousLesson && (
+          {/* {previousLesson && (
             <>
-              <Text className="text-base font-poppins-medium text-gray-600 mb-2">Previous</Text>
+              <Text className="text-base font-poppins-medium text-gray-600 mb-2">
+                Previous
+              </Text>
               {renderLessonItem({ item: previousLesson })}
             </>
-          )}
+          )} */}
 
-          <Text className="text-base font-poppins-medium text-gray-600 mt-4 mb-2">Current</Text>
-          {lesson && renderLessonItem({ item: lesson, isCurrentLesson: true })}
+          <Text className="text-base font-poppins-medium text-gray-600 mt-4 mb-2">
+            Current
+          </Text>
+          {lessons &&
+            renderLessonItem({ item: lessons, isCurrentLesson: true })}
 
           {nextLesson && (
             <>
-              <Text className="text-base font-poppins-medium text-gray-600 mt-4 mb-2">Up Next</Text>
+              <Text className="text-base font-poppins-medium text-gray-600 mt-4 mb-2">
+                Up Next
+              </Text>
               {renderLessonItem({ item: nextLesson })}
             </>
           )}
 
-          <Text className="text-base font-poppins-medium text-gray-600 mt-6 mb-2">All Lessons</Text>
+          <Text className="text-base font-poppins-medium text-gray-600 mt-6 mb-2">
+            All Lessons
+          </Text>
           {sortedPlaylist
-            .filter(item => 
-              item.id_lesson !== currentLessonId && 
-              item.id_lesson !== previousLesson?.id_lesson && 
-              item.id_lesson !== nextLesson?.id_lesson
+            .filter(
+              (item) =>
+                item.id !== currentLessonId &&
+                item.id !== previousLesson?.id &&
+                item.id !== nextLesson?.id
             )
-            .map(item => renderLessonItem({ item }))}
+            .map((item) => renderLessonItem({ item }))}
         </View>
       </ScrollView>
     </>

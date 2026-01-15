@@ -6,10 +6,11 @@ import Header from "@/components/Layout/Header";
 import { CourseSummary, fetchCourseById } from "@/services/supabaseApi";
 import { supabase } from "@/utils/supabase";
 import ContentPreview from "@/components/CourseDetail/ContentPreview";
+import { Image } from "expo-image";
 
 const CourseDetail = () => {
   const params = useLocalSearchParams();
-  const [course, setCourse] = useState<CourseSummary | null>(null);
+  const [course, setCourse] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -106,12 +107,17 @@ const CourseDetail = () => {
       />
       <ScrollView className="px-5 ">
         <View className="mb-32">
-          <View>
+          <View className="rounded-md">
             {/* @ts-ignore  */}
             {/* <Slider data={slider} /> */}
+            <Image
+              source={course?.image_url}
+              style={{ width: "100%", height: 200, borderRadius: 10 }}
+              className="rounded-md"
+            />
           </View>
 
-          <View>
+          <View className="">
             <View>
               <Text
                 style={{ fontSize: 24, fontWeight: "600", marginVertical: 20 }}
@@ -121,23 +127,21 @@ const CourseDetail = () => {
               </Text>
               <View className="flex flex-row justify-between ">
                 <View className="flex flex-row place-items-center gap-2 mt-2">
-                  {/* <Image
-                    source={{ uri: instructor?.profile_image }}
-                    width={20}
-                    height={20}
+                  <Image
+                    source={{ uri: course?.user_profiles?.profile_image }}
+                    style={{ width: 32, height: 32, borderRadius: 16 }}
                     className="rounded-full"
-                  /> */}
+                  />
                   <Text style={{ fontSize: 16 }} className="font-poppins">
-                    {course?.mon}
+                    {course?.user_profiles?.name ?? "Unknown Instructor"}
                   </Text>
                 </View>
-                <View className="flex flex-row p-2 gap-2 bg-[#FFF0CC] rounded-md">
-                  <Ionicons name="star" color="#FFB200" size={16} />
+                <View className="flex flex-row px-4 py-1 gap-2 bg-[#FFF0CC] rounded-md items-center">
                   <Text
-                    style={{ fontSize: 18, fontWeight: "600" }}
+                    style={{ fontSize: 12, fontWeight: "600" }}
                     className="font-poppins-medium"
                   >
-                    {course?.rating ?? 0}
+                    {course?.category ?? ""}
                   </Text>
                 </View>
               </View>
