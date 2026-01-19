@@ -62,26 +62,19 @@ export default function Index() {
       const timer = setTimeout(() => {
         // Route based on authentication state and onboarding
         if (!hasSeenOnboarding) {
-          router.replace("/(onboarding)/welcome");
+          router.push("/(onboarding)/welcome");
         } else if (user && token) {
           // User is authenticated, go to main app
-          router.replace("/(tab)");
+          router.push("/(tab)/(home)");
         } else {
           // No auth, go to login
-          router.replace("/(auth)/login");
+          router.push("/(auth)/login");
         }
       }, 2000);
 
       return () => clearTimeout(timer);
     }
-  }, [
-    isLoading,
-    hasCheckedAuth,
-    hasSeenOnboarding,
-    hasCheckedOnboarding,
-    user,
-    token,
-  ]);
+  }, [isLoading, hasCheckedAuth, hasSeenOnboarding, hasCheckedOnboarding]);
 
   // Show splash while loading
 }

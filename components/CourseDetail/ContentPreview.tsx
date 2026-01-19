@@ -1,7 +1,7 @@
-import { View, Text, FlatList } from "react-native";
+import { View, Text, FlatList, Pressable } from "react-native";
 import React from "react";
 import { Ionicons } from "@expo/vector-icons";
-import { Link } from "expo-router";
+import { Link, useRouter } from "expo-router";
 
 const ContentPreview = ({
   title,
@@ -11,6 +11,7 @@ const ContentPreview = ({
   paid,
   id,
   lessons,
+  quiz,
 }: {
   title: string;
   id: string;
@@ -19,7 +20,9 @@ const ContentPreview = ({
   type: string;
   paid: boolean;
   lessons?: any;
+  quiz?: any;
 }) => {
+  const router = useRouter();
   return (
     // @ts-ignore
     <View>
@@ -29,31 +32,56 @@ const ContentPreview = ({
       </View>
       <FlatList
         data={lessons}
-        renderItem={({ item }) => (
-          <Link
-            href={`(tab)/courseDetail/playlist/${item.id}`}
-            className="mb-2"
-          >
-            <View className="w-full relative border flex flex-row items-center gap-3 border-gray-300 p-4 rounded-lg">
-              <Text className="text-2xl font-poppins-medium">{item.order}</Text>
-              <View className="flex flex-col  ">
-                <Text className="font-poppins-medium text-xl">
-                  {item.title}
+        renderItem={({ item }) => {
+          return (
+            <Link href={`../courseDetail/playlist/${item.id}`} className="mb-2">
+              <View className="w-full relative border flex flex-row items-center gap-3 border-gray-300 p-4 rounded-lg">
+                <Text className="text-2xl font-poppins-medium">
+                  {item.order}
                 </Text>
-                <Text className="font-poppins">
-                  {item.type} {item.duration && `- ${item.duration}`}
-                </Text>
-              </View>
-              {!paid && (
-                <View className="absolute right-5 p-2 bg-[#2066A0] rounded-full">
-                  <Ionicons name="play" color={"#FFB200"} size={16} />
+                <View className="flex flex-col  ">
+                  <Text className="font-poppins-medium text-xl">
+                    {item.title}
+                  </Text>
+                  <Text className="font-poppins">
+                    {item.type} {item.duration && `- ${item.duration}`}
+                  </Text>
                 </View>
-              )}
-            </View>
-          </Link>
-        )}
+                {!paid && (
+                  <View className="absolute right-5 p-2 bg-[#2066A0] rounded-full">
+                    <Ionicons name="play" color={"#FFB200"} size={16} />
+                  </View>
+                )}
+              </View>
+            </Link>
+          );
+        }}
         contentContainerStyle={{ gap: 10, marginBottom: 10 }}
       />
+      <Pressable
+        onPress={() => {
+          router.push({
+            pathname: "../quiz",
+            params: { quizId: quiz.id, moduleId: id },
+          });
+        }}
+        className="mb-2"
+      >
+        <View className="w-full relative border flex flex-row items-center gap-3 border-gray-300 p-4 rounded-lg">
+          <Text className="text-2xl font-poppins-medium">
+            {lessons.length + 1}
+          </Text>
+          <View className="flex flex-col  ">
+            <Text className="font-poppins-medium text-xl">{quiz.title}</Text>
+            {/* <Text className="font-poppins">
+              {quiz.type} {quiz.duration && `- ${quiz.duration}`}
+            </Text> */}
+          </View>
+          <View className="absolute right-5 p-2 bg-[#2066A0] rounded-full">
+            <Ionicons name="book" size={16} color="#FFB200" />
+          </View>
+        </View>
+      </Pressable>
     </View>
   );
 };

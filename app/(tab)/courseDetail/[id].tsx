@@ -1,4 +1,11 @@
-import { View, Text, SafeAreaView, ScrollView, FlatList } from "react-native";
+import {
+  View,
+  Text,
+  SafeAreaView,
+  ScrollView,
+  FlatList,
+  ActivityIndicator,
+} from "react-native";
 import React, { useEffect, useState } from "react";
 import { Link, Stack, useLocalSearchParams } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
@@ -38,12 +45,12 @@ const CourseDetail = () => {
             `
     *,
     user_profiles!mentor_id(*),
-    course_modules(*, course_lessons(*))
+    course_modules(*, course_lessons(*), module_quizzes(*))
   `
           )
           .eq("id", courseId)
           .single();
-        console.log(result.data);
+        console.log(result.data.course_modules[0].module_quizzes);
         if (isMounted) {
           setCourse(result.data || null);
         }
@@ -75,7 +82,7 @@ const CourseDetail = () => {
           }}
         />
         <View className="flex-1 items-center justify-center">
-          <Text>Loading course...</Text>
+          <ActivityIndicator />
         </View>
       </SafeAreaView>
     );
@@ -105,7 +112,7 @@ const CourseDetail = () => {
           header: () => <Header title={"Course Detail"} href=".." />,
         }}
       />
-      <ScrollView className="px-5 ">
+      <ScrollView className="flex-1 px-5 ">
         <View className="mb-32">
           <View className="rounded-md">
             {/* @ts-ignore  */}
@@ -174,6 +181,7 @@ const CourseDetail = () => {
                     duration={item.duration}
                     paid={item.paid}
                     lessons={item.course_lessons}
+                    quiz={item.module_quizzes}
                   />
                 )}
                 keyExtractor={(item) => item?.id.toString()}

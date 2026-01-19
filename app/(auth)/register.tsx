@@ -60,7 +60,7 @@ export default function RegisterScreen() {
         "Registration successful! Check your email to confirm your account.";
 
       Toast.show(confirmationMessage);
-      router.replace("/(auth)/login");
+      router.push("/(auth)/login");
     } catch (err: any) {
       const errorMessage =
         err.message || "An error occurred during registration";

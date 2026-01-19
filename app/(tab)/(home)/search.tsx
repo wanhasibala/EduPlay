@@ -9,7 +9,7 @@ import {
 } from "react-native";
 import React, { useState, useCallback } from "react";
 import { Ionicons } from "@expo/vector-icons";
-import courseData from "../../data/data.json";
+import courseData from "../../../data/data.json";
 import { Link } from "expo-router";
 
 interface Course {

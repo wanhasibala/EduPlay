@@ -51,7 +51,7 @@ const ProfileSettings = () => {
         await supabase.auth.signOut();
         Toast.show("Successfully logged out");
 
-        router.replace({
+        router.push({
           pathname: "/(auth)/login",
         });
         // Protected routes will automatically redirect to login
