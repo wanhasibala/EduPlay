@@ -24,8 +24,8 @@ const CourseDetail = () => {
   const courseId = Array.isArray(params.id)
     ? Number(params.id[0])
     : params.id
-    ? Number(params.id)
-    : null;
+      ? Number(params.id)
+      : null;
 
   useEffect(() => {
     let isMounted = true;
@@ -46,7 +46,7 @@ const CourseDetail = () => {
     *,
     user_profiles!mentor_id(*),
     course_modules(*, course_lessons(*), module_quizzes(*))
-  `
+  `,
           )
           .eq("id", courseId)
           .single();
@@ -76,10 +76,12 @@ const CourseDetail = () => {
     return (
       <SafeAreaView style={{ flex: 1 }}>
         <Stack.Screen
-          options={{
-            //@ts-ignore
-            header: () => <Header title={"Course Detail"} href=".." />,
-          }}
+          options={
+            {
+              //@ts-ignore
+              // header: () => <Header title={"Course Detail"} href=".." />,
+            }
+          }
         />
         <View className="flex-1 items-center justify-center">
           <ActivityIndicator />
@@ -106,11 +108,14 @@ const CourseDetail = () => {
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
+      <Header title={"Course Detail"} href=".." />
       <Stack.Screen
-        options={{
-          //@ts-ignore
-          header: () => <Header title={"Course Detail"} href=".." />,
-        }}
+        options={
+          {
+            //@ts-ignore
+            // header: () => <Header title={"Course Detail"} href=".." />,
+          }
+        }
       />
       <ScrollView className="flex-1 px-5 ">
         <View className="mb-32">

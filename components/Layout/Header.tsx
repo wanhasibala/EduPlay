@@ -20,25 +20,23 @@ interface CustomHeaderProps {
 const Header: React.FC<CustomHeaderProps> = ({ title, description, href }) => {
   const router = useRouter();
   return (
-    <SafeAreaView className="-mb-5">
-      <View style={styles.headerContainer}>
-        {href && (
-          <Link href={href || ".."} className="absolute left-10">
-            <Ionicons name="chevron-back" size={20} />
-          </Link>
-        )}
-        <View className="flex items-center gap-2">
-          <Text className="font-poppins-semibold" style={styles.text}>
-            {title}
+    <View style={styles.headerContainer}>
+      {href && (
+        <Link href={href || ".."} className="absolute left-10">
+          <Ionicons name="chevron-back" size={20} />
+        </Link>
+      )}
+      <View className="flex items-center gap-2">
+        <Text className="font-poppins-semibold" style={styles.text}>
+          {title}
+        </Text>
+        {description && (
+          <Text className="text-blue-400 text-sm font-poppins">
+            {description}
           </Text>
-          {description && (
-            <Text className="text-blue-400 text-sm font-poppins">
-              {description}
-            </Text>
-          )}
-        </View>
+        )}
       </View>
-    </SafeAreaView>
+    </View>
   );
 };
 

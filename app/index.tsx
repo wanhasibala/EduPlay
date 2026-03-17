@@ -31,12 +31,12 @@ export default function Index() {
     // Start animation
     opacity.value = withSequence(
       withTiming(1, { duration: 1000 }),
-      withTiming(1, { duration: 1000 })
+      withTiming(1, { duration: 1000 }),
     );
 
     scale.value = withSequence(
       withTiming(1.1, { duration: 1000 }),
-      withTiming(1, { duration: 1000 })
+      withTiming(1, { duration: 1000 }),
     );
   }, [opacity, scale]);
 
@@ -57,6 +57,7 @@ export default function Index() {
   }, []);
 
   useEffect(() => {
+    console.log(hasSeenOnboarding, hasCheckedOnboarding);
     // Wait for auth checks to complete
     if (!isLoading && hasCheckedAuth && hasCheckedOnboarding) {
       const timer = setTimeout(() => {

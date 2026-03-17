@@ -1,4 +1,4 @@
-import { View, Text, Image, StyleSheet } from "react-native";
+import { View, Text, Image, StyleSheet, ActivityIndicator } from "react-native";
 import { useState, useEffect } from "react";
 import { COLORS } from "@/components/constant/color";
 import { Link } from "expo-router";
@@ -48,7 +48,7 @@ export const ListCourse = () => {
   if (isLoading) {
     return (
       <View>
-        <Text>Loading...</Text>
+        <ActivityIndicator />
       </View>
     );
   }

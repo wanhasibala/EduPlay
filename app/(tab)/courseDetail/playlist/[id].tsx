@@ -6,6 +6,7 @@ import {
   Image,
   FlatList,
   Dimensions,
+  ActivityIndicator,
 } from "react-native";
 import WebView from "react-native-webview";
 import { Ionicons } from "@expo/vector-icons";
@@ -43,7 +44,7 @@ const Playlist = () => {
         const { data, error } = await supabase
           .from("course_lessons")
           .select(
-            "*, course_modules(*, internship_courses(*, user_profiles!mentor_id(*)))"
+            "*, course_modules(*, internship_courses(*, user_profiles!mentor_id(*)))",
           )
           .eq("id", currentLessonId)
           .single();
@@ -78,7 +79,7 @@ const Playlist = () => {
     const sortedLessons = allLessons.sort((a, b) => (a.id || 0) - (b.id || 0));
 
     const currentIndex = sortedLessons.findIndex(
-      (lesson) => lesson.id === currentLessonId
+      (lesson) => lesson.id === currentLessonId,
     );
 
     return {
@@ -140,16 +141,9 @@ const Playlist = () => {
   );
 
   return (
-    <>
-      <Stack.Screen
-        options={{
-          headerShown: false,
-        }}
-      />
-      <Header
-        title={lessons?.title || ""}
-        href={`/(tab)/courseDetail/${lessons?.course_modules?.internship_courses.id}`}
-      />
+    <SafeAreaView style={{ flex: 1 }}>
+      <Stack.Screen options={{}} />
+      <Header title={lessons?.title || ""} href={`..`} />
       <ScrollView className="bg-white">
         {/* VideoPlayer */}
         <View className="aspect-video relative">
@@ -165,9 +159,7 @@ const Playlist = () => {
               startInLoadingState
               renderLoading={() => (
                 <View className="absolute inset-0 items-center justify-center bg-black/20">
-                  <Text className="text-white font-poppins-medium">
-                    Loading...
-                  </Text>
+                  <ActivityIndicator />
                 </View>
               )}
             />
@@ -239,12 +231,12 @@ const Playlist = () => {
               (item) =>
                 item.id !== currentLessonId &&
                 item.id !== previousLesson?.id &&
-                item.id !== nextLesson?.id
+                item.id !== nextLesson?.id,
             )
             .map((item) => renderLessonItem({ item }))}
         </View>
       </ScrollView>
-    </>
+    </SafeAreaView>
   );
 };
 
